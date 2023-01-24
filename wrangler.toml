@@ -1,4 +1,6 @@
 compatibility_date = "2022-11-25"
+compatibility_flags = ["durable_object_alarms"]
+
 name = "worker-template"
 workers_dev = true
 routes = []
@@ -9,6 +11,12 @@ main = "./dist/_worker.js"
 [build]
 command = "npm install && npm run build"
 upload.format = "modules"
+
+[durable_objects]
+bindings = [
+	{ name = "eventStorage", class_name = "EventStorage" },
+	{ name = "actionStorage", class_name = "ActionStorage" },
+]
 
 [env.production]
 workers_dev = false
