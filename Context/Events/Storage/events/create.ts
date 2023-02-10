@@ -8,9 +8,9 @@ import { storageRouter } from "../storageRouter"
 
 const SECONDS = 1000
 
-export async function create(
+async function create(
 	request: http.Request,
-	context: Storage.Context<EventStorage>
+	storageContext: Storage.Context<EventStorage>
 ): Promise<http.Response.Like | any> {
 	let result: gracely.Result
 	const events = await request.body
@@ -21,14 +21,14 @@ export async function create(
 			// Add timestamp. Here's where this.lastTimestamp comes in -- if we receive a bunch of
 			// messages at the same time (or if the clock somehow goes backwards????), we'll assign
 			// them sequential timestamps, so at least the ordering is maintained.
-			const timestamp = Math.max(Date.now(), context.durableObject.lastTimestamp + 1)
-			context.durableObject.lastTimestamp = timestamp
+			const timestamp = Math.max(Date.now(), storageContext.durableObject.lastTimestamp + 1)
+			storageContext.durableObject.lastTimestamp = timestamp
 
-			await context.state.storage.put<model.Event[]>(new Date(timestamp).toISOString(), events)
+			await storageContext.state.storage.put<model.Event[]>(new Date(timestamp).toISOString(), events)
 			// If there is no alarm currently set, set one for 10 seconds from now
 			// Any further POSTs in the next 10 seconds will be part of this kh.
-			if ((await context.state.storage.getAlarm()) == null) {
-				await context.state.storage.setAlarm(Date.now() + 10 * SECONDS)
+			if ((await storageContext.state.storage.getAlarm()) == null) {
+				await storageContext.state.storage.setAlarm(Date.now() + 10 * SECONDS)
 			}
 
 			result = gracely.success.created(events)

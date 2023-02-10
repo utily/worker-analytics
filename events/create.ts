@@ -10,8 +10,9 @@ export async function create(request: http.Request, context: Context): Promise<h
 	const events = await request.body
 	// if (!request.header.authorization)
 	// 	result = gracely.client.unauthorized()
+
 	if (!isly.array(model.Event.type).is(events))
-		result = gracely.client.flawedContent(isly.array(model.Event.type).flaw(events) as any)
+		result = gracely.client.flawedContent(isly.array(model.Event.type).flaw(events)!)
 	else if (gracely.Error.is(context.events))
 		result = context.events
 	else {
@@ -22,3 +23,4 @@ export async function create(request: http.Request, context: Context): Promise<h
 	return result
 }
 router.add("POST", "/events", create)
+1
