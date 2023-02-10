@@ -1,5 +1,6 @@
 import { Context } from "./Context"
 
+// Let endpoints register:
 import "./events"
 import "./version"
 

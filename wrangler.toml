@@ -21,14 +21,14 @@ bindings = [
 [env.production]
 workers_dev = false
 vars = {  }
-durable_objects.bindings = []
+#durable_objects.bindings = []
 kv_namespaces = []
 r2_buckets = []
 
 [env.local]
 workers_dev = true
 vars = { adminSecret = "adminSecret" }
-durable_objects.bindings = []
+#durable_objects.bindings = []
 kv_namespaces = []
 r2_buckets = []
 
