@@ -1,7 +1,7 @@
 import * as gracely from "gracely"
 import * as http from "cloudly-http"
 import * as model from "../../../../model"
-import { Storage } from "../../../Storage"
+import { Storage } from "../../../../util/Storage"
 import { EventStorage } from ".."
 import { storageRouter } from "../storageRouter"
 
@@ -12,11 +12,11 @@ async function fetch(
 	let result: gracely.Result
 	try {
 		const waitingEvents: model.Event[] = []
-		const waitingEventBatches = await storageContext.state.storage.list<model.Event[]>()
-		Array.from(waitingEventBatches.entries()).forEach(([timestamp, events]) => {
-			events.forEach(event =>
+		const waitingBatches = await storageContext.state.storage.list<model.SavedBatch>()
+		Array.from(waitingBatches.entries()).forEach(([timestamp, batch]) => {
+			batch.events.forEach(event =>
 				waitingEvents.push({
-					created: timestamp,
+					created: batch.created,
 					...event,
 				})
 			)

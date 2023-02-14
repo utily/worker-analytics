@@ -17,7 +17,11 @@ export async function create(request: http.Request, context: Context): Promise<h
 		result = context.events
 	else {
 		console.log(events)
-		const response = await context.events.create(events)
+		const batch: model.Batch = {
+			events,
+			cloudflareProperties: context.cloudflareProperties,
+		}
+		const response = await context.events.addBatch(batch)
 		result = gracely.Error.is(response) ? gracely.server.databaseFailure(response) : gracely.success.created(response)
 	}
 	return result

@@ -6,9 +6,9 @@ import { EventStorage as EStorage } from "./Storage"
 export class Events {
 	private constructor(private readonly backend: storage.DurableObject.Namespace<gracely.Error>) {}
 
-	async create(events: model.Event[], shard?: number): Promise<model.Event[] | gracely.Error> {
+	async addBatch(batch: model.Batch, shard?: number): Promise<model.Batch | gracely.Error> {
 		const storageClient = this.backend.open("events" + (shard ?? ""))
-		return await storageClient.post<model.Event[]>("/events", events)
+		return await storageClient.post<model.Batch>("/batch", batch)
 	}
 
 	async fetch(shard?: number): Promise<model.Event[] | gracely.Error> {

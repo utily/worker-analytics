@@ -2,6 +2,7 @@ import { Context } from "./Context"
 
 // Let endpoints register:
 import "./events"
+import "./listener"
 import "./version"
 
 // Worker:
@@ -13,4 +14,4 @@ export default {
 
 // Durable objects:
 export const EventStorage = Context.Events.Storage
-export const ActionStorage = Context.Actions.Storage
+export const BucketStorage = Context.Bucket.Storage

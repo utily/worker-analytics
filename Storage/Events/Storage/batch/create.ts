@@ -1,8 +1,8 @@
 import * as gracely from "gracely"
 import * as http from "cloudly-http"
-import * as isly from "isly"
 import * as model from "../../../../model"
-import { Storage } from "../../../Storage"
+import { SavedBatch } from "../../../../model/SavedBatch"
+import { Storage } from "../../../../util/Storage"
 import { EventStorage } from ".."
 import { storageRouter } from "../storageRouter"
 
@@ -13,9 +13,9 @@ async function create(
 	storageContext: Storage.Context<EventStorage>
 ): Promise<http.Response.Like | any> {
 	let result: gracely.Result
-	const events = await request.body
-	if (!isly.array(model.Event.type).is(events))
-		result = gracely.client.flawedContent(model.Event.flaw(events) as any)
+	const batch = await request.body
+	if (!model.Batch.type.is(batch))
+		result = gracely.client.flawedContent(model.Event.flaw(batch)!)
 	else {
 		try {
 			// Add timestamp. Here's where this.lastTimestamp comes in -- if we receive a bunch of
@@ -24,14 +24,14 @@ async function create(
 			const timestamp = Math.max(Date.now(), storageContext.durableObject.lastTimestamp + 1)
 			storageContext.durableObject.lastTimestamp = timestamp
 
-			await storageContext.state.storage.put<model.Event[]>(new Date(timestamp).toISOString(), events)
+			const savedBatch: SavedBatch = { ...batch, created: new Date(timestamp).toISOString() }
+			await storageContext.state.storage.put<model.Batch>(savedBatch.created, savedBatch)
 			// If there is no alarm currently set, set one for 10 seconds from now
 			// Any further POSTs in the next 10 seconds will be part of this kh.
-			if ((await storageContext.state.storage.getAlarm()) == null) {
+			if ((await storageContext.state.storage.getAlarm()) == null)
 				await storageContext.state.storage.setAlarm(Date.now() + 10 * SECONDS)
-			}
 
-			result = gracely.success.created(events)
+			result = gracely.success.created(savedBatch.events)
 		} catch (error) {
 			result = gracely.server.databaseFailure(error instanceof Error ? error.message : undefined)
 		}
@@ -39,4 +39,4 @@ async function create(
 	return result
 }
 
-storageRouter.router.add("POST", "/events", create)
+storageRouter.router.add("POST", "/batch", create)

@@ -1,8 +1,9 @@
-import { Environment } from "../../Environment"
-import { Storage } from "../../Storage"
+import { Environment } from "../../../Context/Environment"
+import { Storage } from "../../../util/Storage"
 import { storageRouter } from "./storageRouter"
 
 // Let handlers register in the storageRouter:
+import "./batch"
 import "./events"
 import "./alarm"
 

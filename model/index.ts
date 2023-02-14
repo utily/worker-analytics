@@ -1,2 +1,6 @@
-export { Action } from "./Action"
+export { Batch } from "./Batch"
+export { SavedBatch } from "./SavedBatch"
 export { Event } from "./Event"
+export { EventWithMetadata } from "./EventWithMetadata"
+export { ListenerConfiguration } from "./ListenerConfiguration"
+export { Configuration } from "./Configuration"

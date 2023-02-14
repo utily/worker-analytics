@@ -2,20 +2,20 @@ import * as gracely from "gracely"
 import * as http from "cloudly-http"
 import * as isly from "isly"
 import * as model from "../../../../model"
-import { Storage } from "../../../Storage"
-import { ActionStorage } from ".."
+import { Storage } from "../../../../util/Storage"
+import { BucketStorage } from ".."
 import { storageRouter } from "../storageRouter"
 
 const SECONDS = 1000
 
 export async function create(
 	request: http.Request,
-	context: Storage.Context<ActionStorage>
+	context: Storage.Context<BucketStorage>
 ): Promise<http.Response.Like | any> {
 	let result: gracely.Result
-	const actions = await request.body
-	if (!isly.array(model.Action.type).is(actions))
-		result = gracely.client.flawedContent(model.Action.flaw(actions) as any)
+	const events = await request.body
+	if (!isly.array(model.EventWithMetadata.type).is(events))
+		result = gracely.client.flawedContent(isly.array(model.EventWithMetadata.type).flaw(events) as any)
 	else {
 		try {
 			// Add timestamp. Here's where this.lastTimestamp comes in -- if we receive a bunch of
@@ -24,14 +24,16 @@ export async function create(
 			const timestamp = Math.max(Date.now(), context.durableObject.lastTimestamp + 1)
 			context.durableObject.lastTimestamp = timestamp
 
-			await context.state.storage.put<model.Action[]>(new Date(timestamp).toISOString(), actions)
+			// Note: It exists an earlier timestamp in the batch.
+
+			await context.state.storage.put<model.EventWithMetadata[]>(new Date(timestamp).toISOString(), events)
 			// If there is no alarm currently set, set one for 10 seconds from now
 			// Any further POSTs in the next 10 seconds will be part of this kh.
 			if ((await context.state.storage.getAlarm()) == null) {
 				await context.state.storage.setAlarm(Date.now() + 10 * SECONDS)
 			}
 
-			result = gracely.success.created(actions)
+			result = gracely.success.created(events)
 		} catch (error) {
 			result = gracely.server.databaseFailure(error instanceof Error ? error.message : undefined)
 		}
@@ -39,4 +41,4 @@ export async function create(
 	return result
 }
 
-storageRouter.router.add("POST", "/actions", create)
+storageRouter.router.add("POST", "/events", create)

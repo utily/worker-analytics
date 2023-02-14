@@ -3,10 +3,10 @@ import * as http from "cloudly-http"
 import * as storage from "cloudly-storage"
 // import * as model from "../model"
 import { router } from "../router"
-import { Actions as CActions } from "./Actions"
+import { Bucket as CBucket } from "../Storage/Bucket"
+import { Events as CEvents } from "../Storage/Events"
 import { Configuration } from "./Configuration"
 import { Environment as CEnvironment } from "./Environment"
-import { Events as CEvents } from "./Events"
 // import { storageRouter } from "./Events/Storage/storageRouter"
 
 export class Context {
@@ -16,14 +16,22 @@ export class Context {
 			Context.Events.open(storage.DurableObject.Namespace.open(this.environment.eventStorage)) ??
 			gracely.server.misconfigured("eventStorage", "Events storage configuration missing."))
 	}
-	#actions?: Context.Actions | gracely.Error
-	get actions(): Context.Actions | gracely.Error {
-		return (this.#actions ??=
-			Context.Actions.open(storage.DurableObject.Namespace.open(this.environment.actionStorage)) ??
-			gracely.server.misconfigured("actionStorage", "Actions storage configuration missing."))
+	#bucket?: Context.Bucket | gracely.Error
+	get bucket(): Context.Bucket | gracely.Error {
+		return (this.#bucket ??=
+			Context.Bucket.open(storage.DurableObject.Namespace.open(this.environment.bucketStorage)) ??
+			gracely.server.misconfigured("bucketStorage", "Bucket storage configuration missing."))
 	}
 
-	constructor(public readonly configuration: Configuration, public readonly environment: Context.Environment) {}
+	constructor(
+		public readonly configuration: Configuration,
+		public readonly environment: Context.Environment,
+		/**
+		 * Incoming Request's Cloudflare Properties
+		 * https://developers.cloudflare.com/workers/runtime-apis/request/#incomingrequestcfproperties
+		 */
+		public readonly cloudflareProperties: Request["cf"]
+	) {}
 
 	async authenticate(request: http.Request): Promise<"admin" | undefined> {
 		return this.environment.adminSecret && request.header.authorization == `Basic ${this.environment.adminSecret}`
@@ -33,7 +41,7 @@ export class Context {
 
 	static async handle(request: Request, environment: Context.Environment): Promise<Response> {
 		let result: http.Response
-		const context = await Context.load(environment)
+		const context = await Context.load(environment, request.cf)
 		if (!context)
 			result = http.Response.create(gracely.server.misconfigured("Configuration", "Configuration is missing."))
 		else {
@@ -46,9 +54,12 @@ export class Context {
 		}
 		return http.Response.to(result)
 	}
-	static async load(environment: Context.Environment): Promise<Context | undefined> {
+	static async load(
+		environment: Context.Environment,
+		cloudflareProperties?: Request["cf"]
+	): Promise<Context | undefined> {
 		const configuration = await Configuration.load(environment)
-		return !configuration ? undefined : new Context(configuration, environment)
+		return !configuration ? undefined : new Context(configuration, environment, cloudflareProperties)
 	}
 }
 
@@ -58,6 +69,6 @@ export namespace Context {
 	export const Events = CEvents
 	export type Events = CEvents
 
-	export const Actions = CActions
-	export type Actions = CActions
+	export const Bucket = CBucket
+	export type Bucket = CBucket
 }

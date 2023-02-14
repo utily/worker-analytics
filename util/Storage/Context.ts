@@ -1,4 +1,4 @@
-import { Environment } from "../Environment"
+import { Environment } from "../../Context/Environment"
 
 /**
  * This context is created and sent with every request to Storage (The DurableObject)

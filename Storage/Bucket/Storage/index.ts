@@ -1,9 +1,9 @@
-import { Environment } from "../../Environment"
-import { Storage } from "../../Storage"
+import { Environment } from "../../../Context/Environment"
+import { Storage } from "../../../util/Storage"
 import { storageRouter } from "./storageRouter"
 
 // Let handlers register in the storageRouter!
-import "./actions"
+import "./events"
 import "./alarm"
 
 export const storageProcessor = new Storage.Processor(storageRouter)
@@ -14,7 +14,7 @@ export const storageProcessor = new Storage.Processor(storageRouter)
  * Batcher-inspiration from
  * https://blog.cloudflare.com/durable-objects-alarms/
  */
-export class ActionStorage implements DurableObject {
+export class BucketStorage implements DurableObject {
 	public lastTimestamp: number
 	// public count: number
 	constructor(private readonly state: DurableObjectState, private readonly environment: Environment) {

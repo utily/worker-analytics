@@ -86,12 +86,12 @@
     "authly": "^3.0.1",
     "cloudly-http": "^0.1.2",
     "cloudly-router": "^0.1.1",
+    "cloudly-storage": "file:../cloudly-storage",
     "gracely": "file:../gracely",
-		"isly": "file:../isly",
-		"cloudly-storage": "file:../cloudly-storage",
-		"selectively": "^2.0.4"
+    "isly": "file:../isly",
+    "selectively": "^2.0.4"
   },
-	"dependenciesComments": {
-		"isly": "github:utily/isly#version-0-1"
+  "dependenciesComments": {
+    "isly": "file:github:utily/isly#version-0-1"
   }
 }

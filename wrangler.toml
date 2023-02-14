@@ -15,7 +15,7 @@ upload.format = "modules"
 [durable_objects]
 bindings = [
 	{ name = "eventStorage", class_name = "EventStorage" },
-	{ name = "actionStorage", class_name = "ActionStorage" },
+	{ name = "bucketStorage", class_name = "BucketStorage" },
 ]
 
 [env.production]
