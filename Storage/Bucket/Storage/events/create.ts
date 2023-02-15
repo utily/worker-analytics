@@ -28,8 +28,6 @@ export async function create(
 			const timestamp = Math.max(Date.now(), context.durableObject.lastTimestamp + 1)
 			context.durableObject.lastTimestamp = timestamp
 
-			// Note: It exists an earlier timestamp in the batch.
-
 			await context.state.storage.put<model.EventWithMetadata[]>(`/events/${new Date(timestamp).toISOString()}`, events)
 			// If there is no alarm currently set, set one for 10 seconds from now
 			// Any further POSTs in the next 10 seconds will be part of this kh.

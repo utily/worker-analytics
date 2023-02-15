@@ -30,11 +30,6 @@ export class BucketStorage implements DurableObject {
 		// no need to store this to disk since we assume if the object is destroyed and recreated, much
 		// more than a millisecond will have gone by.
 		this.lastTimestamp = 0
-
-		// listenerConfiguration:
-		this.state.blockConcurrencyWhile(async () => {
-			this.listenerConfiguration = await this.state.storage.get<ListenerConfiguration>("/configuration")
-		})
 	}
 	async fetch(request: Request): Promise<Response> {
 		return storageProcessor.handle(request, this.environment, this.state, this)
