@@ -13,12 +13,6 @@ type Implementations = {
 	}
 }
 
-// type Implementations = Record<
-// 	ListenerConfiguration["type"],
-// 	// About constructor-signature: https://stackoverflow.com/a/13408029/1003172
-// 	{ new (configuration: ListenerConfiguration): AbstractListener }
-// >
-
 const implementations: Implementations = {
 	// List all implementations her:
 	"big-query": BigQuery.Implementation,

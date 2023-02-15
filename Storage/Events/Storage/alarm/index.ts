@@ -1,10 +1,11 @@
 import * as gracely from "gracely"
-import * as selectively from "selectively"
 import * as model from "../../../../model"
+import { Filter } from "../../../../service/Filter"
+import { AbstractFilter } from "../../../../service/Filter/AbstractFilter"
 import { ListenerConfiguration } from "../../../../service/Listener/ListenerConfiguration"
 import { generateKeyBatch } from "../../../../util/Storage/functions"
 import { storageRouter } from "../storageRouter"
-type CompiledListeners = Record<string, ListenerConfiguration & { selectivelyFilter: selectively.Rule }>
+type CompiledListeners = Record<string, ListenerConfiguration & { filterImplementations: AbstractFilter[] }>
 
 function* generateBucket(waitingBatches: Map<string, model.Batch>, listeners: CompiledListeners) {
 	const buckets: Record<string, model.EventWithMetadata[]> = {}
@@ -17,9 +18,13 @@ function* generateBucket(waitingBatches: Map<string, model.Batch>, listeners: Co
 					cloudflareProperties: batch.cloudflareProperties,
 					...event,
 				}
-				if (listener.selectivelyFilter.is(eventWithMetaData)) {
+				const filterdValue = listener.filterImplementations.reduce<model.EventWithMetadata | undefined>(
+					(filterValue, filter) => (filterValue ? filter.filter(filterValue) : filterValue),
+					eventWithMetaData
+				)
+				if (filterdValue) {
 					// Limit for bucket is: 131072 bytes
-					const size = JSON.stringify(eventWithMetaData).length
+					const size = JSON.stringify(filterdValue).length
 					let accumulatedSize = (bucketsSize[listener.name] ?? 0) + size + 1
 					// Unknown how the serialization is done, when the value is stored.
 					// We need som margins here:
@@ -28,7 +33,7 @@ function* generateBucket(waitingBatches: Map<string, model.Batch>, listeners: Co
 						accumulatedSize = size
 						buckets[listener.name] = []
 					}
-					;(buckets[listener.name] ??= []).push(eventWithMetaData)
+					;(buckets[listener.name] ??= []).push(filterdValue)
 					bucketsSize[listener.name] = accumulatedSize
 				}
 			}
@@ -54,7 +59,7 @@ storageRouter.alarm = async function alarm(storageContext) {
 			listener.name,
 			{
 				...listener,
-				selectivelyFilter: selectively.parse(listener.filter),
+				filterImplementations: Filter.createList(listener.filter),
 			},
 		])
 	)

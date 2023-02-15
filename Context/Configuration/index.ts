@@ -11,14 +11,19 @@ const dummy: Configuration = {
 	listeners: [
 		{
 			name: "all",
-			filter: "",
+			filter: [],
 			type: "logger",
 			batchSize: 10,
 			batchDuration: 2,
 		},
 		{
 			name: "localhost",
-			filter: "source:localhost",
+			filter: [
+				{
+					type: "selectively",
+					expression: "source:localhost",
+				},
+			],
 			type: "logger",
 			batchSize: 10,
 			batchDuration: 3,

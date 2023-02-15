@@ -1,4 +1,5 @@
 import * as isly from "isly"
+import { FilterConfiguration } from "../Filter/FilterConfiguration"
 
 export interface Configuration {
 	name: string
@@ -14,7 +15,7 @@ export interface Configuration {
 	/**
 	 * A selectively-expression
 	 */
-	filter: string
+	filter: FilterConfiguration[]
 
 	comment?: string
 }
@@ -24,7 +25,7 @@ export namespace Configuration {
 			name: isly.string(/^[a-z0-9_-]+$/),
 			batchSize: isly.number("positive"),
 			batchDuration: isly.number("positive"),
-			filter: isly.string(),
+			filter: isly.array(FilterConfiguration.type),
 			comment: isly.optional(isly.string()),
 		},
 		"ListenerConfiguration"
