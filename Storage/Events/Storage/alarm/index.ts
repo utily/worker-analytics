@@ -1,6 +1,7 @@
 import * as gracely from "gracely"
 import * as selectively from "selectively"
 import * as model from "../../../../model"
+import { generateKeyBatch } from "../../../../util/Storage/functions"
 import { storageRouter } from "../storageRouter"
 
 storageRouter.alarm = async function alarm(storageContext) {
@@ -13,13 +14,19 @@ storageRouter.alarm = async function alarm(storageContext) {
 
 	const waitingBatches = await storageContext.state.storage.list<model.Batch>()
 	const buckets: Record<string, model.EventWithMetadata[]> = {}
-	const listeners = workerContext.configuration.listeners.map(listener => ({
-		name: listener.name,
-		selectivelyFilter: selectively.parse(listener.filter),
-	}))
+	const listeners = Object.fromEntries(
+		workerContext.configuration.listeners.map(listener => [
+			listener.name,
+			{
+				...listener,
+				selectivelyFilter: selectively.parse(listener.filter),
+			},
+		])
+	)
+
 	Array.from(waitingBatches.entries()).forEach(([timestamp, batch]) => {
 		batch.events.forEach(event =>
-			listeners.forEach(listener => {
+			Object.values(listeners).forEach(listener => {
 				const eventWithMetaData: model.EventWithMetadata = {
 					created: timestamp,
 					cloudflareProperties: batch.cloudflareProperties,
@@ -36,9 +43,13 @@ storageRouter.alarm = async function alarm(storageContext) {
 		throw bucketStorage
 	}
 	await Promise.all(
-		Object.entries(buckets).map(async ([listener, events]) => {
-			await bucketStorage.append(listener, events)
+		Object.entries(buckets).map(async ([listenerName, events]) => {
+			console.log(`Filling bucket ${listenerName} with ${events.length} events.`)
+			await bucketStorage.append(listeners[listenerName], events)
 		})
 	)
-	await storageContext.state.storage.deleteAll()
+	// Delete bucketed values:
+	for (const keyBatch of generateKeyBatch(waitingBatches, 128)) {
+		await storageContext.state.storage.delete(keyBatch)
+	}
 }

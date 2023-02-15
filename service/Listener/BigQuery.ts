@@ -1,5 +1,8 @@
-import { Batch } from "../../model"
-import type { Listener } from "."
+import * as isly from "isly"
+import { Batch, EventWithMetadata } from "../../model"
+import { PrivateKey } from "../../model/PrivateKey"
+import { AbstractListener } from "./AbstractListener"
+import { Configuration } from "./Configuration"
 
 // https://cloud.google.com/bigquery/docs/reference/rest/v2/tabledata/insertAll
 
@@ -11,33 +14,31 @@ import type { Listener } from "."
 
 // https://github.com/pax2pay/model-cde/blob/master/Proxy/Selector.ts
 
-// export interface BigQuery extends Base {
-// 	type: "big-query"
-// 	connection: string
-// 	/**
-// 	 * JSONPath?
-// 	 */
-// 	mapping: Record<string /* tableName */, Record<string, string>>
-// }
-// export namespace BigQuery {
-// 	export const type = baseType.extend<BigQuery>(
-// 		{
-// 			type: isly.string("big-query"),
-// 			connection: isly.string(),
-// 			/**
-// 			 * TODO: fix!
-// 			 */
-// 			mapping: isly.any(),
-// 		},
-// 		"Listener.BigQuery"
-// 	)
-// 	export const is = type.is
-// 	export const flaw = type.flaw
-// }
+export interface BigQuery extends Configuration {
+	type: "big-query"
+	privateKey: PrivateKey
 
-export class BigQuery implements Listener {
-	processBatch(batch: Batch[]): Promise<boolean[]> {
-		console.log(batch)
-		throw new Error("Method not implemented.")
+	/**
+	 * JSONPath?
+	 */
+	mapping?: Record<string /* tableName */, Record<string, string>>
+}
+export namespace BigQuery {
+	export const type = Configuration.type.extend<BigQuery>(
+		{
+			type: isly.string("big-query"),
+			privateKey: PrivateKey.type,
+			/**
+			 * TODO: fix!
+			 */
+			mapping: isly.optional(isly.any()),
+		},
+		"Listener.BigQuery"
+	)
+	export class Implementation extends AbstractListener<BigQuery> {
+		processBatch(batch: EventWithMetadata[]): Promise<boolean[]> {
+			console.log(batch)
+			throw new Error("Method not implemented.")
+		}
 	}
 }

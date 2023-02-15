@@ -2,6 +2,7 @@ import * as gracely from "gracely"
 import * as storage from "cloudly-storage"
 import { Client } from "cloudly-storage/dist/DurableObject/Client"
 import * as model from "../../model"
+import { ListenerConfiguration } from "../../service/Listener/ListenerConfiguration"
 import { BucketStorage as BStorage } from "./Storage"
 
 /**
@@ -12,12 +13,20 @@ export class Bucket {
 	private storageClient: Record<string, Client<gracely.Error> | undefined> = {}
 	private constructor(private readonly backend: storage.DurableObject.Namespace<gracely.Error>) {}
 
-	private getStorageClient(listenerName: string) {
-		return (this.storageClient[listenerName] ??= this.backend.open(listenerName))
+	private async getStorageClient(listenerConfiguration: ListenerConfiguration): Promise<Client<gracely.Error>> {
+		let result = this.storageClient[listenerConfiguration.name]
+		if (!result) {
+			result = this.backend.open(listenerConfiguration.name)
+			await result.post<ListenerConfiguration>("/configuration", listenerConfiguration)
+		}
+		return result
 	}
 
-	async append(listener: string, events: model.EventWithMetadata[]): Promise<model.Batch | gracely.Error> {
-		return this.getStorageClient(listener).post<model.Batch>("/bucket", events)
+	async append(
+		listenerConfiguration: ListenerConfiguration,
+		events: model.EventWithMetadata[]
+	): Promise<model.Batch | gracely.Error> {
+		return (await this.getStorageClient(listenerConfiguration)).post<model.Batch>("/events", events)
 	}
 
 	// async list(listenerName: string): Promise<model.Action[] | gracely.Error> {

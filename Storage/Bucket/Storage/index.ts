@@ -1,8 +1,10 @@
 import { Environment } from "../../../Context/Environment"
+import { ListenerConfiguration } from "../../../service/Listener/ListenerConfiguration"
 import { Storage } from "../../../util/Storage"
 import { storageRouter } from "./storageRouter"
 
 // Let handlers register in the storageRouter!
+import "./configuration"
 import "./events"
 import "./alarm"
 
@@ -16,6 +18,10 @@ export const storageProcessor = new Storage.Processor(storageRouter)
  */
 export class BucketStorage implements DurableObject {
 	public lastTimestamp: number
+	private listenerConfiguration: ListenerConfiguration | undefined
+	public async getListenerConfiguration(): Promise<ListenerConfiguration | undefined> {
+		return (this.listenerConfiguration ??= await this.state.storage.get<ListenerConfiguration>("/configuration"))
+	}
 	// public count: number
 	constructor(private readonly state: DurableObjectState, private readonly environment: Environment) {
 		// From: https://github.com/cloudflare/workers-chat-demo/blob/master/src/chat.mjs#L222
@@ -25,11 +31,10 @@ export class BucketStorage implements DurableObject {
 		// more than a millisecond will have gone by.
 		this.lastTimestamp = 0
 
-		// Different approach, make it possible to count.
-		// this.state.blockConcurrencyWhile(async () => {
-		// 	const values = await this.state.storage.list({ reverse: true, limit: 1 })
-		// 	this.count = values.size == 0 ? 0 : parseInt(values.keys().next().value)
-		// })
+		// listenerConfiguration:
+		this.state.blockConcurrencyWhile(async () => {
+			this.listenerConfiguration = await this.state.storage.get<ListenerConfiguration>("/configuration")
+		})
 	}
 	async fetch(request: Request): Promise<Response> {
 		return storageProcessor.handle(request, this.environment, this.state, this)

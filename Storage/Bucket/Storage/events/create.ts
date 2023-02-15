@@ -14,9 +14,13 @@ export async function create(
 ): Promise<http.Response.Like | any> {
 	let result: gracely.Result
 	const events = await request.body
+	const listenerConfiguration = await context.durableObject.getListenerConfiguration()
+
 	if (!isly.array(model.EventWithMetadata.type).is(events))
 		result = gracely.client.flawedContent(isly.array(model.EventWithMetadata.type).flaw(events) as any)
-	else {
+	else if (!listenerConfiguration?.batchDuration)
+		result = gracely.client.notFound("No configuration found in bucket.")
+	else
 		try {
 			// Add timestamp. Here's where this.lastTimestamp comes in -- if we receive a bunch of
 			// messages at the same time (or if the clock somehow goes backwards????), we'll assign
@@ -26,18 +30,18 @@ export async function create(
 
 			// Note: It exists an earlier timestamp in the batch.
 
-			await context.state.storage.put<model.EventWithMetadata[]>(new Date(timestamp).toISOString(), events)
+			await context.state.storage.put<model.EventWithMetadata[]>(`/events/${new Date(timestamp).toISOString()}`, events)
 			// If there is no alarm currently set, set one for 10 seconds from now
 			// Any further POSTs in the next 10 seconds will be part of this kh.
 			if ((await context.state.storage.getAlarm()) == null) {
-				await context.state.storage.setAlarm(Date.now() + 10 * SECONDS)
+				await context.state.storage.setAlarm(Date.now() + listenerConfiguration.batchDuration * SECONDS)
 			}
 
 			result = gracely.success.created(events)
 		} catch (error) {
 			result = gracely.server.databaseFailure(error instanceof Error ? error.message : undefined)
 		}
-	}
+
 	return result
 }
 

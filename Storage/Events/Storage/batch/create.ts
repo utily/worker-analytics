@@ -29,7 +29,7 @@ async function create(
 			// If there is no alarm currently set, set one for 10 seconds from now
 			// Any further POSTs in the next 10 seconds will be part of this kh.
 			if ((await storageContext.state.storage.getAlarm()) == null)
-				await storageContext.state.storage.setAlarm(Date.now() + 10 * SECONDS)
+				await storageContext.state.storage.setAlarm(Date.now() + 5 * SECONDS)
 
 			result = gracely.success.created(savedBatch.events)
 		} catch (error) {
