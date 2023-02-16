@@ -5,7 +5,11 @@ import { AbstractFilter } from "./AbstractFilter"
 import { Configuration } from "./Configuration"
 export interface Selectively extends Configuration {
 	type: "selectively"
-	expression: string
+	/**
+	 * A selectively-expression
+	 * Real type is string, rest is for type-prediction.
+	 */
+	expression: `${EventWithMetadata.Selector}:` | (string & Record<never, never>)
 }
 export namespace Selectively {
 	export const type = Configuration.type.extend<Selectively>(

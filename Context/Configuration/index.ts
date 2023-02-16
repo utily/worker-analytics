@@ -18,6 +18,7 @@ const dummy: Configuration = {
 						["created", "created"],
 						["cloudflare.asOrganization", "as"],
 						["cloudflare.region", "region"],
+						["action", "action"],
 					],
 				},
 			],

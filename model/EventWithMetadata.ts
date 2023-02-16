@@ -6,6 +6,11 @@ export interface EventWithMetadata extends Event {
 	cloudflare?: Request["cf"]
 }
 
+/**
+ * Used for autocomplete in IDE.
+ * Usage: EventWithMetadataSelector | (string & Record<never, never>)
+ */
+
 export namespace EventWithMetadata {
 	export const type = Event.type.extend<EventWithMetadata>(
 		{
@@ -16,4 +21,5 @@ export namespace EventWithMetadata {
 	)
 	export const is = type.is
 	export const flaw = type.flaw
+	export type Selector = keyof EventWithMetadata | `cloudflare.${keyof Required<EventWithMetadata>["cloudflare"]}`
 }
