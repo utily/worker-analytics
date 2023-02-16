@@ -6,7 +6,18 @@ import { Selector } from "./Selector"
 
 export interface Mapping extends Configuration {
 	type: "mapping"
-	mapping: [Selector, Selector][]
+	/**
+	 * Specify all properties of the mapped object.
+	 */
+	mapping: [
+		// The real type is Selector, rest is for type-prediction in IDE
+		(
+			| keyof EventWithMetadata
+			| `cloudflare.${keyof Required<EventWithMetadata>["cloudflare"]}`
+			| (Selector & Record<never, never>)
+		),
+		Selector
+	][]
 }
 export namespace Mapping {
 	export const type = Configuration.type.extend<Mapping>(

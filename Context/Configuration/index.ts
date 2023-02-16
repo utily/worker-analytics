@@ -11,7 +11,16 @@ const dummy: Configuration = {
 	listeners: [
 		{
 			name: "all",
-			filter: [],
+			filter: [
+				{
+					type: "mapping",
+					mapping: [
+						["created", "created"],
+						["cloudflare.asOrganization", "as"],
+						["cloudflare.region", "region"],
+					],
+				},
+			],
 			type: "logger",
 			batchSize: 10,
 			batchDuration: 2,
@@ -28,8 +37,8 @@ const dummy: Configuration = {
 					mapping: [
 						["created", "created"],
 						["cloudflare.region", "region"],
-						["cloudflare.longitude", "posO.x"],
-						["cloudflare.latitude", "posO.y"],
+						["cloudflare.longitude", "posObject.x"],
+						["cloudflare.latitude", "posObject.y"],
 						["cloudflare.latitude", "pos[1]"],
 						["cloudflare.longitude", "pos[0]"],
 					],
