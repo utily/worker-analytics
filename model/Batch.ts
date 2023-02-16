@@ -3,14 +3,14 @@ import { Event } from "./Event"
 
 export interface Batch {
 	events: Event[]
-	cloudflareProperties?: Request["cf"]
+	cloudflare?: Request["cf"]
 }
 
 export namespace Batch {
 	export const type = isly.object<Batch>(
 		{
 			events: isly.array(Event.type),
-			cloudflareProperties: isly.optional(isly.any()),
+			cloudflare: isly.optional(isly.any()),
 		},
 		"Batch"
 	)

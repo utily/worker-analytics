@@ -8,23 +8,23 @@ import { storageRouter } from "../storageRouter"
 type CompiledListeners = Record<string, ListenerConfiguration & { filterImplementations: AbstractFilter[] }>
 
 function* generateBucket(waitingBatches: Map<string, model.Batch>, listeners: CompiledListeners) {
-	const buckets: Record<string, model.EventWithMetadata[]> = {}
+	const buckets: Record<string, object[]> = {}
 	const bucketsSize: Record<string, number> = {}
 	for (const [timestamp, batch] of waitingBatches.entries()) {
 		for (const event of batch.events) {
 			for (const listener of Object.values(listeners)) {
 				const eventWithMetaData: model.EventWithMetadata = {
 					created: timestamp,
-					cloudflareProperties: batch.cloudflareProperties,
+					cloudflare: batch.cloudflare,
 					...event,
 				}
-				const filterdValue = listener.filterImplementations.reduce<model.EventWithMetadata | undefined>(
+				const filteredValue = listener.filterImplementations.reduce<object | undefined>(
 					(filterValue, filter) => (filterValue ? filter.filter(filterValue) : filterValue),
 					eventWithMetaData
 				)
-				if (filterdValue) {
+				if (filteredValue) {
 					// Limit for bucket is: 131072 bytes
-					const size = JSON.stringify(filterdValue).length
+					const size = JSON.stringify(filteredValue).length
 					let accumulatedSize = (bucketsSize[listener.name] ?? 0) + size + 1
 					// Unknown how the serialization is done, when the value is stored.
 					// We need som margins here:
@@ -33,7 +33,7 @@ function* generateBucket(waitingBatches: Map<string, model.Batch>, listeners: Co
 						accumulatedSize = size
 						buckets[listener.name] = []
 					}
-					;(buckets[listener.name] ??= []).push(filterdValue)
+					;(buckets[listener.name] ??= []).push(filteredValue)
 					bucketsSize[listener.name] = accumulatedSize
 				}
 			}

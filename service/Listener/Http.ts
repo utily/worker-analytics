@@ -19,7 +19,7 @@ export namespace Http {
 		"Listener.Http"
 	)
 	export class Implementation extends AbstractListener<Http> {
-		processBatch(batch: EventWithMetadata[]): Promise<boolean[]> {
+		processBatch(batch: (EventWithMetadata | object)[]): Promise<boolean[]> {
 			throw new Error("Method not implemented.")
 		}
 	}

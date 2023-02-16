@@ -24,7 +24,7 @@ export namespace Selectively {
 			this.selectivelyFilter = selectively.parse(this.filterConfiguration.expression)
 		}
 
-		filter(event: EventWithMetadata): EventWithMetadata | undefined {
+		filter(event: EventWithMetadata | object): EventWithMetadata | object | undefined {
 			return this.selectivelyFilter.is(event) ? event : undefined
 		}
 	}

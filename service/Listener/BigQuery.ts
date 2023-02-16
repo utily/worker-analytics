@@ -36,7 +36,7 @@ export namespace BigQuery {
 		"Listener.BigQuery"
 	)
 	export class Implementation extends AbstractListener<BigQuery> {
-		processBatch(batch: EventWithMetadata[]): Promise<boolean[]> {
+		processBatch(batch: (EventWithMetadata | object)[]): Promise<boolean[]> {
 			console.log(batch)
 			throw new Error("Method not implemented.")
 		}

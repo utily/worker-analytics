@@ -17,11 +17,11 @@ export namespace Logger {
 	)
 
 	export class Implementation extends AbstractListener<Logger> {
-		processBatch(batch: EventWithMetadata[]): Promise<boolean[]> {
+		processBatch(batch: (EventWithMetadata | object)[]): Promise<boolean[]> {
 			console.log(
 				`Listener.Logger (Name: ${this.listenerConfiguration.name}, BatchSize: ${this.listenerConfiguration.batchSize})`
 			)
-			console.log(batch.map(event => event.created))
+			console.log(batch)
 			return Promise.resolve(batch.map(() => true))
 		}
 	}

@@ -23,6 +23,17 @@ const dummy: Configuration = {
 					type: "selectively",
 					expression: "source:localhost",
 				},
+				{
+					type: "mapping",
+					mapping: [
+						["created", "created"],
+						["cloudflare.region", "region"],
+						["cloudflare.longitude", "posO.x"],
+						["cloudflare.latitude", "posO.y"],
+						["cloudflare.latitude", "pos[1]"],
+						["cloudflare.longitude", "pos[0]"],
+					],
+				},
 			],
 			type: "logger",
 			batchSize: 10,

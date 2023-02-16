@@ -22,10 +22,7 @@ export class Bucket {
 		return result
 	}
 
-	async append(
-		listenerConfiguration: ListenerConfiguration,
-		events: model.EventWithMetadata[]
-	): Promise<model.Batch | gracely.Error> {
+	async append(listenerConfiguration: ListenerConfiguration, events: object[]): Promise<model.Batch | gracely.Error> {
 		return (await this.getStorageClient(listenerConfiguration)).post<model.Batch>("/events", events)
 	}
 

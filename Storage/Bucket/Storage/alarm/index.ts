@@ -13,8 +13,8 @@ import { storageRouter } from "../storageRouter"
  * @param waitingBatches
  * @param size
  */
-function* generateListenerBatch(waitingBatches: Map<string, model.EventWithMetadata[]>, size: number) {
-	let batch: model.EventWithMetadata[] = []
+function* generateListenerBatch(waitingBatches: Map<string, (model.EventWithMetadata | object)[]>, size: number) {
+	let batch: (model.EventWithMetadata | object)[] = []
 	for (const waitingBatch of waitingBatches.values()) {
 		for (const event of waitingBatch) {
 			batch.push(event)
