@@ -1,7 +1,7 @@
 import * as gracely from "gracely"
 import * as http from "cloudly-http"
-import * as model from "../../../../model"
-import { Storage } from "../../../../util/Storage"
+import * as model from "model"
+import { Storage } from "util/Storage"
 import { EventStorage } from ".."
 import { storageRouter } from "../storageRouter"
 

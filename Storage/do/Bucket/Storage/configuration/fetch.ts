@@ -1,7 +1,7 @@
 import * as gracely from "gracely"
 import * as http from "cloudly-http"
-import { ListenerConfiguration } from "../../../../service/Listener/ListenerConfiguration"
-import { Storage } from "../../../../util/Storage"
+import { ListenerConfiguration } from "service/Listener/ListenerConfiguration"
+import { Storage } from "util/Storage"
 import { BucketStorage } from ".."
 import { storageRouter } from "../storageRouter"
 

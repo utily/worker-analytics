@@ -17,7 +17,8 @@
 		"forceConsistentCasingInFileNames": true,
 		"noImplicitThis": true,
 		"strictNullChecks": true,
-		"allowJs": true
+		"allowJs": true,
+		"baseUrl": ".",
   },
   "include": [
     "*.ts",

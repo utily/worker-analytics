@@ -8,16 +8,26 @@ export interface Event {
 	created?: string
 }
 
-export namespace Event {
-	export const type = isly.object<Event>(
-		{
-			source: isly.string(),
-			entity: isly.string(),
-			action: isly.string(),
-			created: isly.optional(isly.string()),
-		},
-		"Event"
-	)
-	export const is = type.is
-	export const flaw = type.flaw
-}
+export const Event = isly.object<Event>(
+	{
+		source: isly.string(),
+		entity: isly.string(),
+		action: isly.string(),
+		created: isly.optional(isly.string()),
+	},
+	"Event"
+)
+
+// export namespace Event {
+// 	export const type = isly.object<Event>(
+// 		{
+// 			source: isly.string(),
+// 			entity: isly.string(),
+// 			action: isly.string(),
+// 			created: isly.optional(isly.string()),
+// 		},
+// 		"Event"
+// 	)
+// 	export const is = type.is
+// 	export const flaw = type.flaw
+// }

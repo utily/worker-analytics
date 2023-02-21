@@ -1,9 +1,10 @@
 import * as isly from "isly"
-import { ListenerConfiguration } from "../../service/Listener/ListenerConfiguration"
+// import { ListenerConfiguration } from "../../service/Listener/ListenerConfiguration"
 import { Environment } from "../Environment"
 
 export interface Configuration {
-	listeners: ListenerConfiguration[]
+	//listeners: ListenerConfiguration[]
+	placeholder?: boolean
 }
 
 // TODO replace with KV
@@ -12,19 +13,19 @@ const dummy: Configuration = {
 		{
 			name: "all",
 			filter: [
-				{
-					type: "mapping",
-					mapping: [
-						["created", "created"],
-						["cloudflare.asOrganization", "as"],
-						["cloudflare.region", "region"],
-						["action", "action"],
-					],
-				},
+				// {
+				// 	type: "mapping",
+				// 	mapping: [
+				// 		["created", "created"],
+				// 		["cloudflare.asOrganization", "as"],
+				// 		["cloudflare.region", "region"],
+				// 		["action", "action"],
+				// 	],
+				// },
 			],
 			type: "logger",
 			batchSize: 10,
-			batchDuration: 2,
+			batchInterval: 2,
 		},
 		{
 			name: "localhost",
@@ -47,7 +48,7 @@ const dummy: Configuration = {
 			],
 			type: "logger",
 			batchSize: 10,
-			batchDuration: 3,
+			batchInterval: 3,
 		},
 
 		// 	{
@@ -58,33 +59,71 @@ const dummy: Configuration = {
 		// 		target: "localhost",
 		// 		batchSize: 10,
 		// 	},
-		// 	{
-		// 		name: "big-query-paxport-paxshop-analytics-dev",
-		// 		type: "big-query",
-		// 		privateKey: {
-		// 			type: "service_account",
-		// 			project_id: "prefab-backbone-377710",
-		// 			private_key_id: "9342ff124fd239d81dc2c4c3b5d46e972db54cc0",
-		// 			private_key:
-		// 				"-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDND0yMopfzG5iV\nzsVGxbM8mC7Kb73Dh1DM2z3kn8aFHJckMa93WGPTIzeTcMiAzTyF8rfrhaj4i91E\nGJ0rCZi2ilGf3hqLAW4QEPwJ9Ta8PVNZq/uS2pjugpvZiXJM9FXUJGgMwWu0Sh3W\n5zBnzXDHGOKJLIp9brZXZ/VQKlr0eAzCNj3ihvnoiymb4WpoJn+9EX5LnbuGlmPw\n4Yc33jefpUhXT8WC88PEBNdssFji36feGFYq5worHpDKdl0lR6AlXieAo21n/E4Y\nfDdwly2BggiYVdym47xK9OomJ6zzaSox9oapa7ILDaHEYLPo3HCjnw6QBVXc3JiP\n0tuCa1EjAgMBAAECggEAAcdcatnuCTAAZ67BfAoIOuFldzicNQNIxBniOhfTM+i/\nn/OjiconVrkgPNKZlgbtd23xNcU6BVVh9/lLTr61XZ2BXbXeIOXBbveqqRe4HEYV\nVOue/qNt0HJp2398FFaLIuWxU6183bsvNkdkcl3L759B/o6Ik2fVbSxn8vkjQuL7\nuksu7e3w9+T94de42zYiwv5L3BQ0SZiUXapUmS5k1SrAUO9fJG6QHu38OgrVYijp\nMKw+iMwrYlE9hl+8Ma6mHQgrslFO/1uTNmIhuzQ+ARMH4brDHVyQUMW6mV0cIdby\nQFn5Oe54wmqOfvfr8xiONkHN3Rb9tmc4Kux3Xbg7IQKBgQDo3OfR5x8BvWow4xcZ\nKH4bDRFj6vasx9SjAXkY6BL3lAAf5H45JXHFYhGiBq4ztV5zf4Fov2bhbk1GVlz+\nZKJT3DKghUR9Lae5Mb/Y4XD2OCqvvneQFckxKbg1O9vbJy7D2oaDkYHfa+baNLS2\nZvNQcCTWqQSCBFVP84+0b0NK+wKBgQDhbzF9trnc7Fe15j2GGxDMfgyWhBa2EpsL\nKDwKgFJRoq23c0JkkNEFQXq+V6QjNZkS6c1Naynlkj8jmYnVZewuBzc/aW+ZKrOm\n5IeFSQgrzlQ28e99xAYxySe8G81MIvGbjhMjBMF7wtMHuFUdtlH4kUvPuhEocBh9\nJJfIH9i5+QKBgFbMyUjP2xn97hBtBdYl5uPUejABjJOZJWThjq8/CprouycoN/i7\nQW5vAN2hmdvCdoOc+rL97a6IPBvE44McJfoWcXSuWHpEw2lf5wBEAKR3CUpbOBwo\nUseVoomNV4WYVHFDCrMOURfkE7gwv0/ijj3kn4a4l+qTDO3xfxamBrJzAoGBAKnA\nNe8o2dneacmB3tANr1+chtQMEKH3bqI/IL7zk4j/S3n5I4Rge9ROUyPjEKimomZY\ngYyLZlgFAOBIrD5xah/atSJdvXgDbJX+PYIC1VFPI6DgGuuD4Po6M151POjY4z+0\nAvr6iMstkASfLBCciir3FbQMswDVL8uD83rxaBvZAoGBAIUYh3v3t8JHinj7lTjH\nePzrC45Oeyv2FwRE2dIUct4uJsnO5UOPj0sKd0BSwyX9niYuTBNVkai0pV+iJbsS\nqlMdZ8q4NlFYyv1NXTJsoPEyGOAEnpZX9BoUlqiZZpYnIB07vDMFLP94mUoiLtOM\ni0e+cK2Vd6UlvWv6OpeYPDlw\n-----END PRIVATE KEY-----\n",
-		// 			client_email: "paxport-paxshop-analytics-dev@prefab-backbone-377710.iam.gserviceaccount.com",
-		// 			client_id: "116287929807825169678",
-		// 			auth_uri: "https://accounts.google.com/o/oauth2/auth",
-		// 			token_uri: "https://oauth2.googleapis.com/token",
-		// 			auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
-		// 			client_x509_cert_url:
-		// 				"https://www.googleapis.com/robot/v1/metadata/x509/paxport-paxshop-analytics-dev%40prefab-backbone-377710.iam.gserviceaccount.com",
-		// 		},
-		// 		filter: "",
-		// 		batchSize: 10,
-		// 	},
+		{
+			name: "big-query-paxport-paxshop-analytics-dev-event2",
+			type: "big-query",
+			privateKey: {
+				type: "service_account",
+				project_id: "prefab-backbone-377710",
+				private_key_id: "6cdc74f54679b8935a3aaaa853474f511eacfe27",
+				private_key:
+					"-----BEGIN PRIVATE KEY-----\nMIIEuwIBADANBgkqhkiG9w0BAQEFAASCBKUwggShAgEAAoIBAQCDthMBZMl3xeXJ\nh2r9dg36h3vAzRA1VP/WWoXJzobydDmwyxVpBWi/qdmliudTEOneo3cPYH0x1gOq\nUEduM7aWbEhTZ5WZ80+LcPsQJyjcP/cz/p1RIbETH7ClojCcAztfAFGvKGjxqY/P\nPRPCF0KjvAebWZ6gx6Vk9/YhJEZK42gGrE+2koCeqGfiYq9+hneddyoB4Vo8Cvxr\n1SCH7O8E3Rvugeqz/Szzaqa5C6YOlvsaDvSnbVf7kgvv43vsRMVnwZqxW6gdgQAB\nTjO6+ya2MWXFClgNaNcwuEd7vz4SVK1xNlIp6b8DDTNo4kuSq2PaWDpDQsOfTdV0\nObm43xIpAgMBAAECgf8pB89j38HjTgMHhOgPjXdNVGd46GjkNFZ+sDR9aZkgbpSK\nPrmsvcKj8oWazGrDtcElWkb8w1I89C6wH9Igwnte4NynHt2719Av4EJWBdz0v/iC\neg8H9zbyfizJbH04HMmiDrdjmXMX1Xq3VI+TJyvbVfgIrSJ9c7RSf+xs5p//M+YL\nZ3KsAffpcFkE8ktCLpymxpCHIRm3etLiPrQlpaLQmjLi0cl/5kOshWHrUPP5XSKu\nS7cmcJmluBApSUADREVbPc8rjmQu0FuD3PY47TaLJy0ZUfBTyEJNOkCZRDtOPjyK\nsIR62tvkQKuabO2BAoQtL0pKrFe2vw7trUBlP10CgYEAuNIvuSYw4HwyMmbhDzMl\nLqZOZyOmghTt1PO4Vocqg0Q/N5cmYInHQD2u3quFPHivbsza63mMSz9RtFnCmjG7\nvvGdcTR5hDP+5s+4qCepPcEJZbpVRovyuMk7oM0aXwP0ttHrm/YkpDuyiaQmvF7Q\nXQgYVW30vxgIQDnPgAKB7i0CgYEAtm+z/D0QHzBm7jGIpUEGNwrHxE0n+YzGWncW\n5AeoonICKWTxDY3s2gREBtcefx+4pqQYR/LMLvacwebc9AeFtQNXyxNiWBw1uwv1\n65oZI6Ltg6WadvOCrpYTWWWOJKSGWTgBfkkLcKiALqUgk3EL6iKoU6et4y+DTgvq\n2fth7W0CgYEAmHDM6hLFB7OIl6fhg+70gSiszEdMZEis7hNj/QKZnxGgbtKd1cxu\nat81p/Wi/ICyelo/Sy/C9qGwW2gZqaLRrymMab4VaGSWn3u/W/ryjbv1a1GoWnq9\n5YodQ4FIegxCQLSed9Iq4MdYeEzLol010TYHFBeQYjmJPKgyLOxkjLUCgYBBf38l\n+yJToEQEFmKRufOqRUONVYoZjRIVnpXoTlub3sSp6eSlUiQL7eYico8vYssfgOB6\nzE/EOKP09Za0QhMd9tJJRW9UZORhgBzNdmi6I5+UWRtIw4pSde0CdnR+8VaOp43Z\nsg3aZ5SFqqE0biyx5bl7N0M1wnQozByIIDl7TQKBgAc/zvRKyybeI3Gq9Bp76zga\nDmuCBGEPQL06HhI1BC/yW2FKPwE2nN1lEGCCIkdpumyhbOV59kZD82ZIntpo7LlZ\nUSv0ZQ5fAOdoZIDVoEMgOw4wSaSJ679jP0QC8W+CGc/xdQ7mk5/awx+TaiujAeES\nwDD7maP87TtSRyrwBhvI\n-----END PRIVATE KEY-----\n",
+				client_email: "paxport-paxshop-analytics-dev@prefab-backbone-377710.iam.gserviceaccount.com",
+				client_id: "116287929807825169678",
+				auth_uri: "https://accounts.google.com/o/oauth2/auth",
+				token_uri: "https://oauth2.googleapis.com/token",
+				auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+				client_x509_cert_url:
+					"https://www.googleapis.com/robot/v1/metadata/x509/paxport-paxshop-analytics-dev%40prefab-backbone-377710.iam.gserviceaccount.com",
+			},
+			filter: [
+				{
+					type: "selectively",
+					expression: "source:localhost",
+				},
+				{
+					type: "mapping",
+					mapping: [
+						// ["source", "source"],
+						// ["action", "action"],
+						// ["entity", "entity"],
+						["created", "created"],
+						// ["cloudflare.country", "country"],
+						// ["cloudflare.country", "location"],
+						// // ["cloudflare.latitude", "location[1]"],
+						// ["cloudflare.longitude", "location[0]"],
+						// ["cloudflare.isEUCountry", "isEu"],
+						// ["cloudflare.city", "city"],
+						//["", "browser"],
+						//["", "browserVersion"],
+						//["", "os"],
+						//["", "osVersion"],
+						// ["", "ip"],
+						// ["", "ref"],
+					],
+				},
+			],
+			batchSize: 10,
+			batchInterval: 4,
+
+			projectName: "prefab-backbone-377710",
+			datasetName: "paxport_paxshop_analytics_dev",
+			tableName: "event2",
+			tableSchema: [
+				{
+					name: "created",
+					type: "STRING",
+				},
+			],
+		},
 	],
-}
+} as Configuration
 
 export namespace Configuration {
 	export const type = isly.object<Configuration>(
 		{
-			listeners: isly.array(ListenerConfiguration.type),
+			placeholder: isly.optional(isly.boolean()),
+			//listeners: isly.array(ListenerConfiguration.type),
 		},
 		"Configuration"
 	)

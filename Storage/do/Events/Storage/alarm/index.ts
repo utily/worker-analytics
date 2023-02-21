@@ -1,9 +1,9 @@
 import * as gracely from "gracely"
-import * as model from "../../../../model"
-import { Filter } from "../../../../service/Filter"
-import { AbstractFilter } from "../../../../service/Filter/AbstractFilter"
-import { ListenerConfiguration } from "../../../../service/Listener/ListenerConfiguration"
-import { generateKeyBatch } from "../../../../util/Storage/functions"
+import * as model from "model"
+import { Filter } from "service/Filter"
+import { AbstractFilter } from "service/Filter/AbstractFilter"
+import { ListenerConfiguration } from "service/Listener/ListenerConfiguration"
+import { generateKeyBatch } from "util/Storage/functions"
 import { storageRouter } from "../storageRouter"
 type CompiledListeners = Record<string, ListenerConfiguration & { filterImplementations: AbstractFilter[] }>
 
@@ -46,16 +46,19 @@ function* generateBucket(waitingBatches: Map<string, model.Batch>, listeners: Co
 
 storageRouter.alarm = async function alarm(storageContext) {
 	// Dynamic import to avoid Circular dependency:
-	const { Context } = await import("../../../../Context")
+	const { Context } = await import("Context")
 	const workerContext = await Context.load(storageContext.environment)
-	if (!workerContext) {
+	if (!workerContext)
 		throw gracely.server.misconfigured("Configuration", "Configuration is missing.")
-	}
+
+	const kvListenerConfiguration = workerContext.listenerConfiguration
+	if (gracely.Error.is(kvListenerConfiguration))
+		throw kvListenerConfiguration
 
 	const waitingBatches = await storageContext.state.storage.list<model.Batch>()
 	//const buckets: Record<string, model.EventWithMetadata[]> = {}
 	const listeners: CompiledListeners = Object.fromEntries(
-		workerContext.configuration.listeners.map(listener => [
+		(await kvListenerConfiguration.listValues()).map(listener => [
 			listener.name,
 			{
 				...listener,

@@ -1,6 +1,6 @@
-import * as model from "../../../../model"
-import { Listener } from "../../../../service/Listener"
-import { generateKeyBatch } from "../../../../util/Storage/functions"
+import * as model from "model"
+import { Listener } from "service/Listener"
+import { generateKeyBatch } from "util/Storage/functions"
 import { storageRouter } from "../storageRouter"
 
 /**

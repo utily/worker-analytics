@@ -1,6 +1,6 @@
 import { AbstractFilter } from "./AbstractFilter"
 import { FilterConfiguration } from "./FilterConfiguration"
-import { Mapping } from "./Mapping"
+import { MappingImplementation } from "./Mapping"
 import { Selectively } from "./Selectively"
 
 type Implementations = {
@@ -13,7 +13,7 @@ type Implementations = {
 const implementations: Implementations = {
 	// List all implementations her:
 	selectively: Selectively.Implementation,
-	mapping: Mapping.Implementation,
+	mapping: MappingImplementation,
 }
 
 export namespace Filter {

@@ -18,21 +18,20 @@ export interface Mapping extends Configuration {
 	mapping: Pair<EventWithMetadata.Selector | (Selector & Record<never, never>)>[]
 }
 
-export namespace Mapping {
-	export const type = Configuration.type.extend<Mapping>(
-		{
-			type: isly.string("mapping"),
-			mapping: isly.array(isly.tuple(Selector.type, Selector.type)),
-		},
-		"Filter.Mapping"
-	)
+export const Mapping = Configuration.type.extend<Mapping>(
+	{
+		type: isly.string("mapping"),
+		mapping: isly.array(isly.tuple(Selector.type, Selector.type)),
+	},
+	"Filter.Mapping"
+)
 
-	export class Implementation extends AbstractFilter<Mapping> {
-		filter(event: EventWithMetadata | object): EventWithMetadata | object | undefined {
-			return this.filterConfiguration.mapping.reduce(
-				(object, [getSelector, setSelector]) => Selector.set(object, setSelector, Selector.get(event, getSelector)),
-				{}
-			)
-		}
+// export namespace Mapping {
+export class MappingImplementation extends AbstractFilter<Mapping> {
+	filter(event: EventWithMetadata | object): EventWithMetadata | object | undefined {
+		return this.filterConfiguration.mapping.reduce(
+			(object, [getSelector, setSelector]) => Selector.set(object, setSelector, Selector.get(event, getSelector)),
+			{}
+		)
 	}
 }

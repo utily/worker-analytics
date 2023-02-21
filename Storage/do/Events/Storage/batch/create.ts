@@ -1,8 +1,8 @@
 import * as gracely from "gracely"
 import * as http from "cloudly-http"
-import * as model from "../../../../model"
-import { SavedBatch } from "../../../../model/SavedBatch"
-import { Storage } from "../../../../util/Storage"
+import * as model from "model"
+import { SavedBatch } from "model/SavedBatch"
+import { Storage } from "util/Storage"
 import { EventStorage } from ".."
 import { storageRouter } from "../storageRouter"
 
@@ -15,7 +15,7 @@ async function create(
 	let result: gracely.Result
 	const batch = await request.body
 	if (!model.Batch.type.is(batch))
-		result = gracely.client.flawedContent(model.Event.flaw(batch)!)
+		result = gracely.client.flawedContent(model.Event.flaw(batch))
 	else {
 		try {
 			// Add timestamp. Here's where this.lastTimestamp comes in -- if we receive a bunch of

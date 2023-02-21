@@ -12,7 +12,7 @@ export async function create(request: http.Request, context: Context): Promise<h
 	// 	result = gracely.client.unauthorized()
 
 	if (!isly.array(model.Event.type).is(events))
-		result = gracely.client.flawedContent(isly.array(model.Event.type).flaw(events)!)
+		result = gracely.client.flawedContent(isly.array(model.Event.type).flaw(events))
 	else if (gracely.Error.is(context.events))
 		result = context.events
 	else {

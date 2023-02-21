@@ -1,20 +1,30 @@
 import * as gracely from "gracely"
 import * as http from "cloudly-http"
-import { Context } from "../Context"
-import { router } from "../router"
+import { Context } from "Context"
+import * as isly from "isly"
+import { router } from "router"
+import { Listener } from "service/Listener"
 
 export async function fetch(request: http.Request, context: Context): Promise<http.Response.Like | any> {
 	let result: gracely.Result
-	if (gracely.Error.is(context.events))
-		result = context.events
+	const name = request.parameter.name
+	const kvListenerConfiguration = context.listenerConfiguration
+	if (gracely.Error.is(kvListenerConfiguration))
+		result = kvListenerConfiguration
+	else if (!isly.string().is(name))
+		result = gracely.client.invalidPathArgument("listener/:name", "name", "string", "A valid identifier is required.")
 	else {
-		const response = context.configuration.listeners.map(listener =>
-			listener.type == "big-query"
-				? { ...listener, privateKey: { ...listener.privateKey, private_key: "********" } }
-				: listener
-		)
-		result = gracely.Error.is(response) ? gracely.server.databaseFailure(response) : gracely.success.ok(response)
+		const listenerConfiguration = await kvListenerConfiguration.fetch(name)
+		if (!listenerConfiguration) {
+			result = gracely.client.notFound(`Listener with name "${name}" not found.`)
+		} else {
+			result = gracely.success.ok({
+				configuration: Listener.create(listenerConfiguration.value).getConfiguration(),
+				...listenerConfiguration.meta,
+				status: "Not implemented",
+			})
+		}
 	}
 	return result
 }
-router.add("GET", "/listener", fetch)
+router.add("GET", "/listener/:name", fetch)

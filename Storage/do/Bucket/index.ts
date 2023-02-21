@@ -1,8 +1,8 @@
 import * as gracely from "gracely"
 import * as storage from "cloudly-storage"
 import { Client } from "cloudly-storage/dist/DurableObject/Client"
-import * as model from "../../model"
-import { ListenerConfiguration } from "../../service/Listener/ListenerConfiguration"
+import * as model from "model"
+import { ListenerConfiguration } from "service/Listener/ListenerConfiguration"
 import { BucketStorage as BStorage } from "./Storage"
 
 /**

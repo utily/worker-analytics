@@ -1,10 +1,10 @@
 import * as gracely from "gracely"
 import * as http from "cloudly-http"
-import * as storage from "cloudly-storage"
 // import * as model from "../model"
 import { router } from "../router"
-import { Bucket as CBucket } from "../Storage/Bucket"
-import { Events as CEvents } from "../Storage/Events"
+import { Bucket as CBucket } from "../Storage/do/Bucket"
+import { Events as CEvents } from "../Storage/do/Events"
+import { ListenerConfiguration as CListenerConfiguration } from "../Storage/kv/ListenerConfiguration"
 import { Configuration } from "./Configuration"
 import { Environment as CEnvironment } from "./Environment"
 // import { storageRouter } from "./Events/Storage/storageRouter"
@@ -13,16 +13,24 @@ export class Context {
 	#events?: Context.Events | gracely.Error
 	get events(): Context.Events | gracely.Error {
 		return (this.#events ??=
-			Context.Events.open(storage.DurableObject.Namespace.open(this.environment.eventStorage)) ??
+			Context.Events.open(this.environment.eventStorage) ??
 			gracely.server.misconfigured("eventStorage", "Events storage configuration missing."))
 	}
+
 	#bucket?: Context.Bucket | gracely.Error
 	get bucket(): Context.Bucket | gracely.Error {
 		return (this.#bucket ??=
-			Context.Bucket.open(storage.DurableObject.Namespace.open(this.environment.bucketStorage)) ??
+			Context.Bucket.open(this.environment.bucketStorage) ??
 			gracely.server.misconfigured("bucketStorage", "Bucket storage configuration missing."))
 	}
 
+	#listenerConfiguration?: Context.ListenerConfiguration | gracely.Error
+	get listenerConfiguration(): Context.ListenerConfiguration | gracely.Error {
+		return (this.#listenerConfiguration ??=
+			(this.environment.listenerConfigurationStorage &&
+				Context.ListenerConfiguration.open(this.environment.listenerConfigurationStorage)) ??
+			gracely.server.misconfigured("listenerConfiguration", "KeyValueNamespace missing."))
+	}
 	constructor(
 		public readonly configuration: Configuration,
 		public readonly environment: Context.Environment,
@@ -71,4 +79,7 @@ export namespace Context {
 
 	export const Bucket = CBucket
 	export type Bucket = CBucket
+
+	export const ListenerConfiguration = CListenerConfiguration
+	export type ListenerConfiguration = CListenerConfiguration
 }

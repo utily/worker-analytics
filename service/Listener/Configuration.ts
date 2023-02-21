@@ -11,7 +11,7 @@ export interface Configuration {
 	 * Number of seconds between every batch.
 	 * Note: If queue is bigger than batchSize, the calls will be directly after each other.
 	 */
-	batchDuration: number
+	batchInterval: number
 	/**
 	 * A selectively-expression
 	 */
@@ -20,12 +20,13 @@ export interface Configuration {
 	comment?: string
 }
 export namespace Configuration {
+	export const namePattern = /^[a-z0-9_-]+$/
 	export const type = isly.object<Configuration>(
 		{
-			name: isly.string(/^[a-z0-9_-]+$/),
+			name: isly.string(namePattern),
 			batchSize: isly.number("positive"),
-			batchDuration: isly.number("positive"),
-			filter: isly.array(FilterConfiguration.type),
+			batchInterval: isly.number("positive"),
+			filter: isly.array(FilterConfiguration),
 			comment: isly.optional(isly.string()),
 		},
 		"ListenerConfiguration"
