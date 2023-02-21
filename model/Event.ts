@@ -13,6 +13,7 @@ export const Event = isly.object<Event>(
 		source: isly.string(),
 		entity: isly.string(),
 		action: isly.string(),
+
 		created: isly.optional(isly.string()),
 	},
 	"Event"

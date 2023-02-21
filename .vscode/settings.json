@@ -1,6 +1,6 @@
 {
 	// Update search.exclude if you add a pattern to files.exclude
-	"sfiles.exclude": {
+	"files.exclude": {
 		".*": true,
 		"*.json": true,
 		"dist": true,

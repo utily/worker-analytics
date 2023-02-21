@@ -19,6 +19,9 @@ export namespace Http {
 		"Listener.Http"
 	)
 	export class Implementation extends AbstractListener<Http> {
+		setup(oldConfiguration?: Http | undefined): Promise<AbstractListener.SetupResult> {
+			return Promise.resolve({ success: true })
+		}
 		processBatch(batch: (EventWithMetadata | object)[]): Promise<boolean[]> {
 			throw new Error("Method not implemented.")
 		}

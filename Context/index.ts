@@ -1,4 +1,5 @@
 import * as gracely from "gracely"
+import { Analytics } from "Analytics"
 import * as http from "cloudly-http"
 // import * as model from "../model"
 import { router } from "../router"
@@ -31,15 +32,21 @@ export class Context {
 				Context.ListenerConfiguration.open(this.environment.listenerConfigurationStorage)) ??
 			gracely.server.misconfigured("listenerConfiguration", "KeyValueNamespace missing."))
 	}
+	/**
+	 * Incoming Request's Cloudflare Properties
+	 * https://developers.cloudflare.com/workers/runtime-apis/request/#incomingrequestcfproperties
+	 */
+	public readonly cloudflareProperties?: Request["cf"]
+	public readonly analytics: Analytics
 	constructor(
 		public readonly configuration: Configuration,
 		public readonly environment: Context.Environment,
-		/**
-		 * Incoming Request's Cloudflare Properties
-		 * https://developers.cloudflare.com/workers/runtime-apis/request/#incomingrequestcfproperties
-		 */
-		public readonly cloudflareProperties: Request["cf"]
-	) {}
+		public readonly executionContext?: ExecutionContext,
+		public readonly request?: Request
+	) {
+		this.cloudflareProperties = request?.cf
+		this.analytics = new Analytics(configuration.analytics, executionContext, request)
+	}
 
 	async authenticate(request: http.Request): Promise<"admin" | undefined> {
 		return this.environment.adminSecret && request.header.authorization == `Basic ${this.environment.adminSecret}`
@@ -47,9 +54,13 @@ export class Context {
 			: undefined
 	}
 
-	static async handle(request: Request, environment: Context.Environment): Promise<Response> {
+	static async handle(
+		request: Request,
+		environment: Context.Environment,
+		executionContext: ExecutionContext
+	): Promise<Response> {
 		let result: http.Response
-		const context = await Context.load(environment, request.cf)
+		const context = await Context.load(environment, executionContext, request)
 		if (!context)
 			result = http.Response.create(gracely.server.misconfigured("Configuration", "Configuration is missing."))
 		else {
@@ -62,12 +73,18 @@ export class Context {
 		}
 		return http.Response.to(result)
 	}
+	/**
+	 * Loads the context.
+	 * This can be called from an Durable Object alarm which does not have
+	 * executionContext neither a request.
+	 */
 	static async load(
 		environment: Context.Environment,
-		cloudflareProperties?: Request["cf"]
+		executionContext?: ExecutionContext,
+		request?: Request
 	): Promise<Context | undefined> {
 		const configuration = await Configuration.load(environment)
-		return !configuration ? undefined : new Context(configuration, environment, cloudflareProperties)
+		return !configuration ? undefined : new Context(configuration, environment, executionContext, request)
 	}
 }
 

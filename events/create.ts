@@ -6,11 +6,11 @@ import * as model from "../model"
 import { router } from "../router"
 
 export async function create(request: http.Request, context: Context): Promise<http.Response.Like | any> {
+	request.header
 	let result: gracely.Result
 	const events = await request.body
 	// if (!request.header.authorization)
 	// 	result = gracely.client.unauthorized()
-
 	if (!isly.array(model.Event.type).is(events))
 		result = gracely.client.flawedContent(isly.array(model.Event.type).flaw(events))
 	else if (gracely.Error.is(context.events))
@@ -20,6 +20,7 @@ export async function create(request: http.Request, context: Context): Promise<h
 		const batch: model.Batch = {
 			events,
 			cloudflare: context.cloudflareProperties,
+			header: request.header,
 		}
 		const response = await context.events.addBatch(batch)
 		result = gracely.Error.is(response) ? gracely.server.databaseFailure(response) : gracely.success.created(response)

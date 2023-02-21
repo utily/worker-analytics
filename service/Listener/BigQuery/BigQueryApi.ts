@@ -133,13 +133,13 @@ export class BigQueryApi {
 }
 
 export namespace BigQueryApi {
-	export type TableSchemaColumn = TableField & {
+	export type TableSchemaField = TableField & {
 		name: string
-		type: typeof TableSchemaColumn.typeValues[number]
-		mode?: typeof TableSchemaColumn.modeValues[number]
+		type: typeof TableSchemaField.typeValues[number]
+		mode?: typeof TableSchemaField.modeValues[number]
 	}
 
-	export namespace TableSchemaColumn {
+	export namespace TableSchemaField {
 		export const typeValues = [
 			"STRING",
 			"BYTES",
@@ -165,7 +165,7 @@ export namespace BigQueryApi {
 			"STRUCT",
 		] as const
 		export const modeValues = ["NULLABLE", "REQUIRED", "REPEATED"] as const
-		export const type: isly.Type<TableSchemaColumn> = isly.object({
+		export const type: isly.Type<TableSchemaField> = isly.object({
 			name: isly.string(/^[a-zA-Z_][a-zA-Z0-9_]{0,299}$/),
 			type: isly.string(typeValues),
 			mode: isly.optional(isly.string(modeValues)),
@@ -176,7 +176,7 @@ export namespace BigQueryApi {
 			),
 			collationSpec: isly.optional(isly.string()),
 			description: isly.optional(isly.string(/* TODO: MaxLength 1024 */)),
-			fields: isly.optional(isly.array(isly.lazy(() => type))),
+			fields: isly.optional(isly.array(isly.lazy(() => type, "FieldDefinition"))),
 			maxLength: isly.optional(isly.string()),
 			policyTags: isly.optional(
 				isly.object({
@@ -190,13 +190,13 @@ export namespace BigQueryApi {
 	export type TableResponse = {
 		kind: "bigquery#table"
 		schema: {
-			fields: TableSchemaColumn[]
+			fields: TableSchemaField[]
 		}
 	}
 	export namespace TableResponse {
 		export const type = isly.object<TableResponse>({
 			kind: isly.string("bigquery#table"),
-			schema: isly.object({ fields: isly.array(TableSchemaColumn.type) }),
+			schema: isly.object({ fields: isly.array(TableSchemaField.type) }),
 		})
 	}
 }

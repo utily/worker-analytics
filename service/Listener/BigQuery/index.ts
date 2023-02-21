@@ -25,7 +25,7 @@ export interface BigQuery extends Configuration {
 	projectName: string
 	datasetName: string
 	tableName: string
-	tableSchema: BigQueryApi.TableSchemaColumn[]
+	tableSchema: BigQueryApi.TableSchemaField[]
 }
 
 export namespace BigQuery {
@@ -36,7 +36,7 @@ export namespace BigQuery {
 			projectName: isly.string(),
 			datasetName: isly.string(),
 			tableName: isly.string(),
-			tableSchema: isly.array(BigQueryApi.TableSchemaColumn.type),
+			tableSchema: isly.array(BigQueryApi.TableSchemaField.type),
 		},
 		"Listener.BigQuery"
 	)

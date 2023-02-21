@@ -16,6 +16,7 @@ function* generateBucket(waitingBatches: Map<string, model.Batch>, listeners: Co
 				const eventWithMetaData: model.EventWithMetadata = {
 					created: timestamp,
 					cloudflare: batch.cloudflare,
+					header: batch.header,
 					...event,
 				}
 				const filteredValue = listener.filterImplementations.reduce<object | undefined>(

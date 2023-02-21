@@ -4,11 +4,12 @@ import { Context } from "./Context"
 import "./events"
 import "./listener"
 import "./version"
+import "./test"
 
 // Worker:
 export default {
-	async fetch(request: Request, environment: Context.Environment) {
-		return await Context.handle(request, environment)
+	async fetch(request: Request, environment: Context.Environment, executionContext: ExecutionContext) {
+		return await Context.handle(request, environment, executionContext)
 	},
 }
 
