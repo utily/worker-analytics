@@ -76,7 +76,7 @@ export class BigQueryApi {
 	/**
 	 * https://cloud.google.com/bigquery/docs/reference/rest/v2/tables/patch
 	 */
-	async patchTable() {
+	async patchTable(): Promise<BigQueryApi.TableResponse | gracely.Error> {
 		const { projectName, datasetName, tableName } = this.listenerConfiguration
 		const patchUrl = `https://bigquery.googleapis.com/bigquery/v2/projects/${projectName}/datasets/${datasetName}/tables/${tableName}`
 		const payload: TableMetadata = {
@@ -89,7 +89,7 @@ export class BigQueryApi {
 				fields: this.listenerConfiguration.tableSchema,
 			},
 		}
-		const bqResp = await http.fetch({
+		const response = await http.fetch({
 			url: patchUrl,
 			method: "PATCH",
 			body: JSON.stringify(payload),
@@ -98,7 +98,14 @@ export class BigQueryApi {
 				authorization: "Bearer " + (await this.getToken()),
 			},
 		})
-		return bqResp
+		const body = await response.body
+		let result: BigQueryApi.TableResponse | gracely.Error
+		if (response.status == 200 && BigQueryApi.TableResponse.type.is(body)) {
+			result = body
+		} else {
+			result = gracely.server.backendFailure("bigquery.googleapis.com", body)
+		}
+		return result
 	}
 
 	/**

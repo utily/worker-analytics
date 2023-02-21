@@ -42,24 +42,16 @@ export namespace BigQuery {
 	)
 
 	export class Implementation extends AbstractListener<BigQuery> {
-		async setup(oldConfiguration?: BigQuery): Promise<true | gracely.Error> {
-			const response = await this.getStatus()
-			return response
-		}
-		protected token: any
-
 		getConfiguration() {
 			return { ...this.configuration, privateKey: { ...this.configuration.privateKey, private_key: "********" } }
 		}
 
-		protected getToken() {
-			return this.token
-		}
-		async getStatus(): Promise<gracely.Error> {
+		async setup(oldConfiguration?: BigQuery): Promise<AbstractListener.SetupResult> {
 			const bigQueryApi = new BigQueryApi(this.configuration)
-			let result: any
+			const result: AbstractListener.SetupResult = { success: true }
 			const table = await bigQueryApi.getTable()
 			if (BigQueryApi.TableResponse.type.is(table)) {
+				;(result.details ??= []).push(`Table ${this.configuration.tableName} exists.`)
 				const allFieldsExists = this.configuration.tableSchema.every(field =>
 					table.schema.fields.some(existingField =>
 						(["name", "type", "mode"] as const).every(
@@ -67,14 +59,25 @@ export namespace BigQuery {
 						)
 					)
 				)
-				if (!allFieldsExists) {
-					result = table
+				if (allFieldsExists) {
+					;(result.details ??= []).push(`Table ${this.configuration.tableName} has all needed fields.`)
 				} else {
-					result = await bigQueryApi.patchTable()
+					;(result.details ??= []).push(`Table ${this.configuration.tableName} needs to be patched.`)
+					const patchResult = await bigQueryApi.patchTable()
+					if (gracely.Error.is(patchResult)) {
+						result.success = false
+						;(result.details ??= []).push(patchResult)
+					} else
+						(result.details ??= []).push(`Table ${this.configuration.tableName} successfully patched.`)
 				}
 			} else {
-				console.error("Couldn't fetch information about table.")
-				result = await bigQueryApi.createTable()
+				;(result.details ??= []).push(`Table ${this.configuration.tableName} does not exists.`)
+				const createResult = await bigQueryApi.createTable()
+				if (gracely.Error.is(createResult)) {
+					result.success = false
+					;(result.details ??= []).push(createResult)
+				} else
+					(result.details ??= []).push(`Table ${this.configuration.tableName} created.`)
 			}
 			return result
 		}

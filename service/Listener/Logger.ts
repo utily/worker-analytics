@@ -17,9 +17,9 @@ export namespace Logger {
 	)
 
 	export class Implementation extends AbstractListener<Logger> {
-		setup(): Promise<true> {
+		setup() {
 			console.log(`Listener.logger setup. (Name: ${this.configuration.name})`)
-			return Promise.resolve(true)
+			return Promise.resolve({ success: true as const })
 		}
 		processBatch(batch: (EventWithMetadata | object)[]): Promise<boolean[]> {
 			console.log(`Listener.Logger (Name: ${this.configuration.name}, BatchSize: ${this.configuration.batchSize})`)

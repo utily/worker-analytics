@@ -15,7 +15,11 @@ export abstract class AbstractListener<C extends ListenerConfiguration> {
 	/**
 	 * This is called when the listener i configured, or reconfigured.
 	 */
-	abstract setup(oldConfiguration?: C): Promise<true | gracely.Error>
+	abstract setup(oldConfiguration?: C): Promise<AbstractListener.SetupResult | gracely.Error>
 
 	abstract processBatch(batch: (EventWithMetadata | object)[]): Promise<boolean[]>
+}
+
+export namespace AbstractListener {
+	export type SetupResult = { success: boolean; details?: (string | gracely.Error)[] }
 }
