@@ -2,7 +2,7 @@ import * as gracely from "gracely"
 import * as isly from "isly"
 import { EventWithMetadata } from "../../../model"
 import { PrivateKey } from "../../../model/PrivateKey"
-import { Base } from "../Base"
+import { BaseListener } from "../Base"
 import { BigQueryApi } from "./BigQueryApi"
 
 // https://cloud.google.com/bigquery/docs/reference/rest/v2/tabledata/insertAll
@@ -18,7 +18,7 @@ import { BigQueryApi } from "./BigQueryApi"
 
 // https://github.com/pax2pay/model-cde/blob/master/Proxy/Selector.ts
 
-export interface BigQuery extends Base.Configuration {
+export interface BigQuery extends BaseListener.Configuration {
 	type: "big-query"
 	privateKey: PrivateKey
 	projectName: string
@@ -28,7 +28,7 @@ export interface BigQuery extends Base.Configuration {
 }
 
 export namespace BigQuery {
-	export const type = Base.Configuration.type.extend<BigQuery>(
+	export const type = BaseListener.Configuration.type.extend<BigQuery>(
 		{
 			type: isly.string("big-query"),
 			privateKey: PrivateKey.type,
@@ -40,14 +40,14 @@ export namespace BigQuery {
 		"Listener.BigQuery"
 	)
 
-	export class Implementation extends Base<BigQuery> {
+	export class Implementation extends BaseListener<BigQuery> {
 		getConfiguration() {
 			return { ...this.configuration, privateKey: { ...this.configuration.privateKey, private_key: "********" } }
 		}
 
-		async setup(oldConfiguration?: BigQuery): Promise<Base.SetupResult> {
+		async setup(oldConfiguration?: BigQuery): Promise<BaseListener.SetupResult> {
 			const bigQueryApi = new BigQueryApi(this.configuration)
-			const result: Base.SetupResult = { success: true }
+			const result: BaseListener.SetupResult = { success: true }
 			const table = await bigQueryApi.getTable()
 			if (BigQueryApi.TableResponse.type.is(table)) {
 				;(result.details ??= []).push(`Table ${this.configuration.tableName} exists.`)

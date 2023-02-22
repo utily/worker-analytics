@@ -1,9 +1,9 @@
 import { selectively } from "selectively"
 import * as isly from "isly"
 import { EventWithMetadata } from "../../model"
-import { AbstractFilter } from "./AbstractFilter"
-import { Configuration } from "./Configuration"
-export interface Selectively extends Configuration {
+import { BaseFilter } from "./Base"
+
+export interface Selectively extends BaseFilter.Configuration {
 	type: "selectively"
 	/**
 	 * A selectively-expression
@@ -12,7 +12,7 @@ export interface Selectively extends Configuration {
 	expression: `${EventWithMetadata.Selector}:` | (string & Record<never, never>)
 }
 export namespace Selectively {
-	export const type = Configuration.type.extend<Selectively>(
+	export const type = BaseFilter.Configuration.type.extend<Selectively>(
 		{
 			type: isly.string("selectively"),
 			expression: isly.string(),
@@ -20,7 +20,7 @@ export namespace Selectively {
 		"Filter.Selectively"
 	)
 
-	export class Implementation extends AbstractFilter<Selectively> {
+	export class Implementation extends BaseFilter<Selectively> {
 		protected selectivelyFilter: selectively.Rule
 
 		constructor(filterConfiguration: Selectively) {

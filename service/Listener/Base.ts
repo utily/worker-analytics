@@ -1,9 +1,9 @@
 import * as gracely from "gracely"
 import * as isly from "isly"
 import { EventWithMetadata } from "../../model"
-import { FilterConfiguration } from "../Filter/FilterConfiguration"
+import { Filter } from "../Filter"
 
-export abstract class Base<C extends Base.Configuration> {
+export abstract class BaseListener<C extends BaseListener.Configuration> {
 	constructor(protected readonly configuration: C) {}
 	/**
 	 * Returns configuration, used by REST-API when returning the configuration.
@@ -16,12 +16,12 @@ export abstract class Base<C extends Base.Configuration> {
 	/**
 	 * This is called when the listener i configured, or reconfigured.
 	 */
-	abstract setup(oldConfiguration?: C): Promise<Base.SetupResult | gracely.Error>
+	abstract setup(oldConfiguration?: C): Promise<BaseListener.SetupResult | gracely.Error>
 
 	abstract processBatch(batch: (EventWithMetadata | object)[]): Promise<boolean[]>
 }
 
-export namespace Base {
+export namespace BaseListener {
 	export type SetupResult = { success: boolean; details?: (string | gracely.Error)[] }
 
 	export interface Configuration {
@@ -38,7 +38,7 @@ export namespace Base {
 		/**
 		 * A selectively-expression
 		 */
-		filter: FilterConfiguration[]
+		filter: Filter.Configuration[]
 
 		comment?: string
 	}
@@ -50,7 +50,7 @@ export namespace Base {
 				name: isly.string(namePattern),
 				batchSize: isly.number("positive"),
 				batchInterval: isly.number("positive"),
-				filter: isly.array(FilterConfiguration),
+				filter: isly.array(Filter.Configuration),
 				comment: isly.optional(isly.string()),
 			},
 			"ListenerConfiguration"
