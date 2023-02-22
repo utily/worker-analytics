@@ -1,6 +1,6 @@
 import * as gracely from "gracely"
 import * as http from "cloudly-http"
-import { ListenerConfiguration } from "service/Listener/ListenerConfiguration"
+import { Listener } from "service/Listener"
 import { Storage } from "util/Storage"
 import { BucketStorage } from ".."
 import { storageRouter } from "../storageRouter"
@@ -11,11 +11,11 @@ export async function create(
 ): Promise<http.Response.Like | any> {
 	let result: gracely.Result
 	const configuration = await request.body
-	if (!ListenerConfiguration.type.is(configuration))
-		result = gracely.client.flawedContent(ListenerConfiguration.type.flaw(configuration))
+	if (!Listener.Configuration.type.is(configuration))
+		result = gracely.client.flawedContent(Listener.Configuration.type.flaw(configuration))
 	else {
 		try {
-			await context.state.storage.put<ListenerConfiguration>("/configuration", configuration)
+			await context.state.storage.put<Listener.Configuration>("/configuration", configuration)
 
 			result = gracely.success.created(configuration)
 		} catch (error) {

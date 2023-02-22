@@ -1,7 +1,8 @@
 import * as gracely from "gracely"
 import { Analytics } from "Analytics"
 import * as http from "cloudly-http"
-// import * as model from "../model"
+import { EventController } from "controller/Event"
+import { ListenerController } from "controller/Listener"
 import { router } from "../router"
 import { Bucket as CBucket } from "../Storage/do/Bucket"
 import { Events as CEvents } from "../Storage/do/Events"
@@ -32,19 +33,36 @@ export class Context {
 				Context.ListenerConfiguration.open(this.environment.listenerConfigurationStorage)) ??
 			gracely.server.misconfigured("listenerConfiguration", "KeyValueNamespace missing."))
 	}
+
+	#listenerController?: ListenerController | gracely.Error
+	get listenerController(): ListenerController | gracely.Error {
+		const listenerConfiguration = this.listenerConfiguration
+		const bucket = this.bucket
+		return (this.#listenerController ??= gracely.Error.is(listenerConfiguration)
+			? listenerConfiguration
+			: gracely.Error.is(bucket)
+			? bucket
+			: new ListenerController(listenerConfiguration, bucket))
+	}
+
+	#eventController?: EventController | gracely.Error
+	get eventController(): EventController | gracely.Error {
+		return (this.#eventController ??= gracely.Error.is(this.events)
+			? this.events
+			: new EventController(this.events, this))
+	}
 	/**
 	 * Incoming Request's Cloudflare Properties
 	 * https://developers.cloudflare.com/workers/runtime-apis/request/#incomingrequestcfproperties
 	 */
-	public readonly cloudflareProperties?: Request["cf"]
 	public readonly analytics: Analytics
 	constructor(
 		public readonly configuration: Configuration,
 		public readonly environment: Context.Environment,
 		public readonly executionContext?: ExecutionContext,
-		public readonly request?: Request
+		public readonly request?: http.Request,
+		public readonly cloudflareProperties?: Request["cf"]
 	) {
-		this.cloudflareProperties = request?.cf
 		this.analytics = new Analytics(configuration.analytics, executionContext, request)
 	}
 
@@ -60,12 +78,13 @@ export class Context {
 		executionContext: ExecutionContext
 	): Promise<Response> {
 		let result: http.Response
-		const context = await Context.load(environment, executionContext, request)
+		const httpRequest = http.Request.from(request)
+		const context = await Context.load(environment, executionContext, httpRequest, request.cf)
 		if (!context)
 			result = http.Response.create(gracely.server.misconfigured("Configuration", "Configuration is missing."))
 		else {
 			try {
-				result = await router.handle(http.Request.from(request), context)
+				result = await router.handle(httpRequest, context)
 			} catch (e) {
 				const details = (typeof e == "object" && e && e.toString()) || undefined
 				result = http.Response.create(gracely.server.unknown(details, "exception"))
@@ -81,10 +100,13 @@ export class Context {
 	static async load(
 		environment: Context.Environment,
 		executionContext?: ExecutionContext,
-		request?: Request
+		request?: http.Request,
+		cloudflareProperties?: Request["cf"]
 	): Promise<Context | undefined> {
 		const configuration = await Configuration.load(environment)
-		return !configuration ? undefined : new Context(configuration, environment, executionContext, request)
+		return !configuration
+			? undefined
+			: new Context(configuration, environment, executionContext, request, cloudflareProperties)
 	}
 }
 

@@ -15,7 +15,7 @@ async function create(
 	let result: gracely.Result
 	const batch = await request.body
 	if (!model.Batch.type.is(batch))
-		result = gracely.client.flawedContent(model.Event.flaw(batch))
+		result = gracely.client.flawedContent(model.Batch.flaw(batch))
 	else {
 		try {
 			// Add timestamp. Here's where this.lastTimestamp comes in -- if we receive a bunch of

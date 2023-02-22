@@ -1,5 +1,5 @@
 import { Environment } from "Context/Environment"
-import { ListenerConfiguration } from "service/Listener/ListenerConfiguration"
+import { Listener } from "service/Listener"
 import { Storage } from "util/Storage"
 import { storageRouter } from "./storageRouter"
 
@@ -19,9 +19,9 @@ export const storageProcessor = new Storage.Processor(storageRouter)
 export class BucketStorage implements DurableObject {
 	public lastTimestamp: number
 
-	private listenerConfiguration: ListenerConfiguration | undefined
-	public async getListenerConfiguration(): Promise<ListenerConfiguration | undefined> {
-		return (this.listenerConfiguration ??= await this.state.storage.get<ListenerConfiguration>("/configuration"))
+	private listenerConfiguration: Listener.Configuration | undefined
+	public async getListenerConfiguration(): Promise<Listener.Configuration | undefined> {
+		return (this.listenerConfiguration ??= await this.state.storage.get<Listener.Configuration>("/configuration"))
 	}
 	// private listenerState: Record<string, any> | undefined | false
 	// public async getListenerState(): Promise<Record<string, any> | undefined> {

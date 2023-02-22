@@ -1,6 +1,6 @@
 import { Analytics } from "Analytics"
 import * as isly from "isly"
-import { ListenerConfiguration } from "service/Listener/ListenerConfiguration"
+import { Listener } from "service/Listener"
 import { Environment } from "../Environment"
 
 export interface Configuration {
@@ -14,7 +14,7 @@ const config: Configuration = {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const dummy: ListenerConfiguration[] = [
+const dummy: Listener.Configuration[] = [
 	{
 		name: "all",
 		filter: [

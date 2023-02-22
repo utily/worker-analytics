@@ -1,6 +1,6 @@
 import * as gracely from "gracely"
 import * as http from "cloudly-http"
-import { ListenerConfiguration } from "service/Listener/ListenerConfiguration"
+import { Listener } from "service/Listener"
 import { Storage } from "util/Storage"
 import { BucketStorage } from ".."
 import { storageRouter } from "../storageRouter"
@@ -9,7 +9,7 @@ export async function fetch(
 	request: http.Request,
 	context: Storage.Context<BucketStorage>
 ): Promise<http.Response.Like | any> {
-	let result: ListenerConfiguration | gracely.Error
+	let result: Listener.Configuration | gracely.Error
 
 	try {
 		result =

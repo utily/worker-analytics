@@ -5,12 +5,16 @@ import { router } from "../../router"
 
 export async function list(request: http.Request, context: Context): Promise<http.Response.Like | any> {
 	let result: gracely.Result
-	const kvListenerConfiguration = context.listenerConfiguration
-	if (gracely.Error.is(kvListenerConfiguration))
-		result = kvListenerConfiguration
-	else {
-		result = gracely.success.ok(kvListenerConfiguration.listKeys())
+	if (gracely.Error.is(context.listenerController)) {
+		result = context.listenerController
+	} else {
+		const value = await context.listenerController.listKeys()
+		if (gracely.Error.is(value))
+			result = value
+		else
+			result = gracely.success.ok(value)
 	}
+
 	return result
 }
 router.add("GET", "/listener", list)

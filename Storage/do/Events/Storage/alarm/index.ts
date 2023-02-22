@@ -2,10 +2,10 @@ import * as gracely from "gracely"
 import * as model from "model"
 import { Filter } from "service/Filter"
 import { AbstractFilter } from "service/Filter/AbstractFilter"
-import { ListenerConfiguration } from "service/Listener/ListenerConfiguration"
+import { Listener } from "service/Listener"
 import { generateKeyBatch } from "util/Storage/functions"
 import { storageRouter } from "../storageRouter"
-type CompiledListeners = Record<string, ListenerConfiguration & { filterImplementations: AbstractFilter[] }>
+type CompiledListeners = Record<string, Listener.Configuration & { filterImplementations: AbstractFilter[] }>
 
 function* generateBucket(waitingBatches: Map<string, model.Batch>, listeners: CompiledListeners) {
 	const buckets: Record<string, object[]> = {}
