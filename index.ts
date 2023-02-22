@@ -1,10 +1,11 @@
 import { Context } from "./Context"
 
 // Let endpoints register:
-import "./events"
-import "./listener"
-import "./version"
-import "./test"
+import "./endpoints/events"
+import "./endpoints/batch"
+import "./endpoints/listener"
+import "./endpoints/version"
+import "./endpoints/test"
 
 // Worker:
 export default {
