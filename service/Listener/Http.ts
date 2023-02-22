@@ -1,25 +1,25 @@
 import * as isly from "isly"
 import { EventWithMetadata } from "../../model"
-import { AbstractListener } from "./AbstractListener"
-import { Configuration } from "./Configuration"
+import { Base } from "./Base"
 
-export interface Http extends Configuration {
+export interface Http extends Base.Configuration {
 	type: "http"
 	/**
 	 * Url
 	 */
 	target: string
 }
+
 export namespace Http {
-	export const type = Configuration.type.extend<Http>(
+	export const type = Base.Configuration.type.extend<Http>(
 		{
 			type: isly.string("http"),
 			target: isly.string(),
 		},
 		"Listener.Http"
 	)
-	export class Implementation extends AbstractListener<Http> {
-		setup(oldConfiguration?: Http | undefined): Promise<AbstractListener.SetupResult> {
+	export class Implementation extends Base<Http> {
+		setup(oldConfiguration?: Http | undefined): Promise<Base.SetupResult> {
 			return Promise.resolve({ success: true })
 		}
 		processBatch(batch: (EventWithMetadata | object)[]): Promise<boolean[]> {
