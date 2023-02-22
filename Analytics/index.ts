@@ -17,30 +17,33 @@ export class Analytics {
 	 * NonBlocking. (Returns void)
 	 * Usage: `analytics.register(...)`
 	 *
-	 * In DurableObject alarm: Returns Promise<void>
+	 * In DurableObject alarm:
+	 * Returns Promise<void>
 	 * Usage: `await analytics.register(...)`
 	 *
 	 * @param events
 	 * @returns
 	 */
 	public register(events: Event | Event[]): void | Promise<void> {
-		if (!Array.isArray(events)) {
-			events = [events]
+		const batch = {
+			events: Array.isArray(events) ? events : [events],
+			cloudflare: this.cloudflareProperties,
+			header: this.request?.header ?? {},
 		}
 		const promise: Promise<void> = http
 			.fetch({
-				url: `${this.configuration.endpoint}/events`,
+				url: `${this.configuration.endpoint}/batch`,
 				method: "POST",
-				body: JSON.stringify(events),
-				// header: {
-				// 	"content-type": "application/json;charset=UTF-8",
-				// 	authorization: "Bearer " + (await this.getToken()),
-				// },
+				body: JSON.stringify(batch),
+				header: {
+					"content-type": "application/json;charset=UTF-8",
+					// 	authorization: "Bearer " + (await this.getToken()),
+				},
 			})
-			.then(response => {
-				if (!(response.status != 201)) {
-					console.error("Unexpected result from analytics-backend.")
-					console.error(response.body)
+			.then(async response => {
+				if (response.status != 201) {
+					console.error(`Unexpected result from analytics-backend. (${this.configuration.endpoint})`)
+					console.error(JSON.stringify(await response.body, null, 2))
 				}
 			})
 			.catch(error => {

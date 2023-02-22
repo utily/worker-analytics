@@ -5,7 +5,6 @@ import * as model from "../../model"
 import { router } from "../../router"
 
 export async function create(request: http.Request, context: Context): Promise<http.Response.Like | any> {
-	request.header
 	let result: gracely.Result
 	const batch = await request.body
 	// if (!request.header.authorization)
