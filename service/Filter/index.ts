@@ -2,6 +2,7 @@ import * as isly from "isly"
 import { BaseFilter } from "./Base"
 import { Mapping } from "./Mapping"
 import { Selectively } from "./Selectively"
+import { Useragent } from "./Useragent"
 
 type Implementations = {
 	[Type in Filter.Configuration["type"]]: {
@@ -14,6 +15,7 @@ const implementations: Implementations = {
 	// List all implementations here:
 	selectively: Selectively.Implementation,
 	mapping: Mapping.Implementation,
+	useragent: Useragent.Implementation,
 }
 
 export namespace Filter {
@@ -24,6 +26,6 @@ export namespace Filter {
 		return filter.map(filterConfiguration => create(filterConfiguration))
 	}
 
-	export type Configuration = Selectively | Mapping
-	export const Configuration = isly.union(Selectively.type, Mapping.type)
+	export type Configuration = Selectively | Mapping | Useragent
+	export const Configuration = isly.union(Selectively.type, Mapping.type, Useragent.type)
 }

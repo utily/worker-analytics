@@ -66,6 +66,7 @@
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-typescript": "^11.0.0",
     "@types/jest": "^29.4.0",
+    "@types/ua-parser-js": "^0.7.36",
     "@typescript-eslint/eslint-plugin": "5.52.0",
     "@typescript-eslint/parser": "5.52.0",
     "eslint": "^8.34.0",
@@ -92,7 +93,8 @@
     "gracely": "file:../gracely",
     "isly": "file:../isly",
     "isoly": "^2.0.14",
-    "selectively": "^2.0.4"
+    "selectively": "^2.0.4",
+    "ua-parser-js": "^1.0.33"
   },
   "dependenciesComments": {
     "isly": "file:github:utily/isly#version-0-1"

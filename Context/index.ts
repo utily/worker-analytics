@@ -63,7 +63,7 @@ export class Context {
 		public readonly request?: http.Request,
 		public readonly cloudflareProperties?: Request["cf"]
 	) {
-		this.analytics = new Analytics(configuration.analytics, executionContext, request)
+		this.analytics = new Analytics(configuration.analytics, executionContext, request, cloudflareProperties)
 	}
 
 	async authenticate(request: http.Request): Promise<"admin" | undefined> {

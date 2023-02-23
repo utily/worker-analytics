@@ -19,7 +19,7 @@ import { BigQueryApi } from "./BigQueryApi"
 // https://github.com/pax2pay/model-cde/blob/master/Proxy/Selector.ts
 
 export interface BigQuery extends BaseListener.Configuration {
-	type: "big-query"
+	type: "bigquery"
 	privateKey: PrivateKey
 	projectName: string
 	datasetName: string
@@ -30,7 +30,7 @@ export interface BigQuery extends BaseListener.Configuration {
 export namespace BigQuery {
 	export const type = BaseListener.Configuration.type.extend<BigQuery>(
 		{
-			type: isly.string("big-query"),
+			type: isly.string("bigquery"),
 			privateKey: PrivateKey.type,
 			projectName: isly.string(),
 			datasetName: isly.string(),

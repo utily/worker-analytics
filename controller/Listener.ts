@@ -11,6 +11,8 @@ type CreateResult = FetchResult & { setup: Listener.SetupResult }
 
 type ListKeysResult = string[]
 
+type RemoveResult = boolean
+
 export class ListenerController {
 	constructor(
 		protected readonly listenerConfigurationStorage: Context.ListenerConfiguration,
@@ -56,6 +58,10 @@ export class ListenerController {
 			}
 		}
 		return result
+	}
+	public async remove(name: string): Promise<RemoveResult | undefined> {
+		return await this.listenerConfigurationStorage.remove(name)
+		// TODO: Remove bucket
 	}
 	public async listKeys(): Promise<ListKeysResult> {
 		return await this.listenerConfigurationStorage.listKeys()

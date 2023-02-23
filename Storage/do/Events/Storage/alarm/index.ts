@@ -19,10 +19,13 @@ function* generateBucket(waitingBatches: Map<string, model.Batch>, listeners: Co
 					header: batch.header,
 					...event,
 				}
-				const filteredValue = listener.filterImplementations.reduce<object | undefined>(
-					(filterValue, filter) => (filterValue ? filter.filter(filterValue) : filterValue),
-					eventWithMetaData
-				)
+				// Run all filters on this eventWithMetaData
+				const filteredValue = listener.filterImplementations.reduce<object | undefined>((filterValue, filter) => {
+					console.log(`Filter, value before ${filter.type}:`, filterValue)
+					return filterValue ? filter.filter(filterValue) : filterValue
+				}, eventWithMetaData)
+				console.log(`Filtered value:`, filteredValue)
+
 				if (filteredValue) {
 					// Limit for bucket is: 131072 bytes
 					const size = JSON.stringify(filteredValue).length

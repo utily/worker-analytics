@@ -14,7 +14,7 @@ type Implementations = {
 
 const implementations: Implementations = {
 	// List all implementations her:
-	"big-query": BigQuery.Implementation,
+	bigquery: BigQuery.Implementation,
 	http: Http.Implementation,
 	logger: Logger.Implementation,
 }

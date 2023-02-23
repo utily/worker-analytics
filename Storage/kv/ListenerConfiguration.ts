@@ -1,4 +1,5 @@
 import * as storage from "cloudly-storage"
+import { boolean } from "isly"
 import { Listener } from "service/Listener"
 
 export class ListenerConfiguration {
@@ -19,6 +20,10 @@ export class ListenerConfiguration {
 	> {
 		const valueWithMetadata = await this.backend.get(name)
 		return valueWithMetadata && (includeMetadata ? valueWithMetadata : valueWithMetadata.value)
+	}
+
+	async remove(name: string): Promise<boolean> {
+		return (await this.fetch(name).then(Boolean)) && (await this.backend.set(name).then(() => true))
 	}
 
 	async create(listenerConfiguration: Listener.Configuration): Promise<void> {
