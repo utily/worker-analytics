@@ -4,11 +4,23 @@ import { Environment } from "../Environment"
 
 export interface Configuration {
 	analytics: Analytics.Configuration
+	analyticsExtraFields?: {
+		amount: number
+		currency: string
+	}
+	analyticsDefaultValues: {
+		source: string
+		currency: string
+	}
 }
 
-const config: Configuration = {
+const configuration: Configuration = {
 	analytics: {
 		endpoint: "http://localhost:8788",
+	},
+	analyticsDefaultValues: {
+		source: "worker-analytics",
+		currency: "SEK",
 	},
 }
 
@@ -16,15 +28,16 @@ export namespace Configuration {
 	export const type = isly.object<Configuration>(
 		{
 			analytics: Analytics.Configuration.type,
+			analyticsDefaultValues: isly.object({ source: isly.string(), currency: isly.string() }),
+			analyticsExtraFields: isly.optional(isly.any()),
 		},
 		"Configuration"
 	)
 	export const is = type.is
 	export const flaw = type.flaw
 
-	export async function load(environment: Environment): Promise<Configuration | undefined> {
+	export async function load(environment: Environment) {
 		let result: Configuration | undefined
-		const configuration: Configuration = config
 		if (is(configuration))
 			result = configuration
 		else

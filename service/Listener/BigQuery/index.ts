@@ -1,6 +1,6 @@
 import * as gracely from "gracely"
 import * as isly from "isly"
-import { EventWithMetadata } from "../../../model"
+import { HasUuid } from "model/HasUuid"
 import { PrivateKey } from "../../../model/PrivateKey"
 import { BaseListener } from "../Base"
 import { BigQueryApi } from "./BigQueryApi"
@@ -41,6 +41,12 @@ export namespace BigQuery {
 	)
 
 	export class Implementation extends BaseListener<BigQuery> {
+		async addStatusDetails(result: BaseListener.StatusResult): Promise<BaseListener.StatusResult> {
+			const bigQueryApi = new BigQueryApi(this.configuration)
+			;(result.details ??= {}).table = await bigQueryApi.getTable()
+
+			return result
+		}
 		getConfiguration() {
 			return { ...this.configuration, privateKey: { ...this.configuration.privateKey, private_key: "********" } }
 		}
@@ -81,18 +87,30 @@ export namespace BigQuery {
 			return result
 		}
 
-		async processBatch(batch: (EventWithMetadata | object)[]): Promise<boolean[]> {
+		async processBatch(batch: HasUuid[]): Promise<boolean[]> {
 			const bigQueryApi = new BigQueryApi(this.configuration)
 			const response = await bigQueryApi.insertAll(
-				batch.map((event, index) => ({
-					// https://cloud.google.com/bigquery/docs/streaming-data-into-bigquery#dataconsistency
-					insertId: (event as any)["created"] + index,
-					json: event,
-				}))
+				batch.map((item, index) => {
+					const { uuid: insertId, ...json } = item
+					return {
+						// https://cloud.google.com/bigquery/docs/streaming-data-into-bigquery#dataconsistency
+						insertId,
+						json,
+					}
+				})
 			)
-			console.log(response)
-			return batch.map(event => true)
-			// throw new Error("Method not implemented.")
+			let success = false
+			if (!response) {
+				console.error(
+					`Listener.BigQuery (Name: ${this.configuration.name}) failed to store values. Http-request failed.`
+				)
+			} else if ((response.insertErrors?.length ?? 0) > 0) {
+				console.error(`Listener.BigQuery (Name: ${this.configuration.name}) failed to store values.`)
+				console.error(response.insertErrors)
+			} else {
+				success = true
+			}
+			return batch.map(item => success)
 		}
 	}
 }

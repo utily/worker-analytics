@@ -1,10 +1,11 @@
 import * as gracely from "gracely"
 import type { Context } from "Context"
 import { Listener } from "service/Listener"
+import { BaseListener } from "service/Listener/Base"
 
 type FetchResult = {
 	configuration: Listener.Configuration
-	status: string
+	status: BaseListener.StatusResult
 } & Partial<Listener.Configuration.Metadata>
 
 type CreateResult = FetchResult & { setup: Listener.SetupResult }
@@ -51,10 +52,11 @@ export class ListenerController {
 		if (!listenerConfiguration) {
 			result = undefined
 		} else {
+			const listener = Listener.create(listenerConfiguration.value)
 			result = {
-				configuration: Listener.create(listenerConfiguration.value).getConfiguration(),
+				configuration: listener.getConfiguration(),
 				...listenerConfiguration.meta,
-				status: "Not implemented",
+				status: await listener.getStatus(),
 			}
 		}
 		return result

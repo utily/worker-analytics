@@ -8,7 +8,7 @@ import { storageRouter } from "../storageRouter"
 type CompiledListeners = Record<string, Listener.Configuration & { filterImplementations: BaseFilter[] }>
 
 function* generateBucket(waitingBatches: Map<string, model.Batch>, listeners: CompiledListeners) {
-	const buckets: Record<string, object[]> = {}
+	const buckets: Record<string, model.HasUuid[]> = {}
 	const bucketsSize: Record<string, number> = {}
 	for (const [timestamp, batch] of waitingBatches.entries()) {
 		for (const event of batch.events) {
@@ -17,21 +17,27 @@ function* generateBucket(waitingBatches: Map<string, model.Batch>, listeners: Co
 					created: timestamp,
 					cloudflare: batch.cloudflare,
 					header: batch.header,
+					uuid: crypto.randomUUID(),
 					...event,
 				}
+				const uuid = eventWithMetaData.uuid
 				// Run all filters on this eventWithMetaData
-				const filteredValue = listener.filterImplementations.reduce<object | undefined>((filterValue, filter) => {
-					console.log(`Filter, value before ${filter.type}:`, filterValue)
-					return filterValue ? filter.filter(filterValue) : filterValue
-				}, eventWithMetaData)
+				const filteredValue: any | undefined = listener.filterImplementations.reduce<object | undefined>(
+					(filterValue, filter) => {
+						console.log(`Filter, value before ${filter.type}:`, filterValue)
+						return filterValue ? filter.filter(filterValue) : filterValue
+					},
+					eventWithMetaData
+				)
 				console.log(`Filtered value:`, filteredValue)
 
 				if (filteredValue) {
+					filteredValue.uuid = uuid
 					// Limit for bucket is: 131072 bytes
 					const size = JSON.stringify(filteredValue).length
 					let accumulatedSize = (bucketsSize[listener.name] ?? 0) + size + 1
 					// Unknown how the serialization is done, when the value is stored.
-					// We need som margins here:
+					// We need some margins here:
 					if (accumulatedSize > 100 * 1024) {
 						yield [listener.name, buckets[listener.name]] as const
 						accumulatedSize = size

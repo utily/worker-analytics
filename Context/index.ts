@@ -51,20 +51,29 @@ export class Context {
 			? this.events
 			: new EventController(this.events, this))
 	}
+
+	#analytics?: Analytics<{ currency: string; amount?: number }, Configuration["analyticsDefaultValues"]>
+	get analytics() {
+		return (this.#analytics ??= new Analytics<{ currency: string }, Configuration["analyticsDefaultValues"]>(
+			this.configuration.analytics,
+			this.executionContext,
+			this.request,
+			this.cloudflareProperties,
+			this.configuration.analyticsDefaultValues
+		))
+	}
+
 	/**
 	 * Incoming Request's Cloudflare Properties
 	 * https://developers.cloudflare.com/workers/runtime-apis/request/#incomingrequestcfproperties
 	 */
-	public readonly analytics: Analytics
 	constructor(
 		public readonly configuration: Configuration,
 		public readonly environment: Context.Environment,
 		public readonly executionContext?: ExecutionContext,
 		public readonly request?: http.Request,
 		public readonly cloudflareProperties?: Request["cf"]
-	) {
-		this.analytics = new Analytics(configuration.analytics, executionContext, request, cloudflareProperties)
-	}
+	) {}
 
 	async authenticate(request: http.Request): Promise<"admin" | undefined> {
 		return this.environment.adminSecret && request.header.authorization == `Basic ${this.environment.adminSecret}`

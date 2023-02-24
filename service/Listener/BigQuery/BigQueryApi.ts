@@ -1,5 +1,5 @@
 import * as gracely from "gracely"
-import type { InsertRowsOptions, TableField, TableMetadata } from "@google-cloud/bigquery"
+import type { InsertRowsOptions, InsertRowsStreamResponse, TableField, TableMetadata } from "@google-cloud/bigquery"
 import { getTokenFromGCPServiceAccount } from "@sagi.io/workers-jwt"
 import { http, Response } from "cloudly-http"
 import * as isly from "isly"
@@ -19,7 +19,7 @@ export class BigQueryApi {
 	/**
 	 * https://cloud.google.com/bigquery/docs/reference/rest/v2/tabledata/insertAll
 	 */
-	async insertAll(rows: InsertRowsOptions["rows"]) {
+	async insertAll(rows: InsertRowsOptions["rows"]): Promise<InsertRowsStreamResponse | undefined> {
 		const { projectName: projectName, datasetName: datasetName, tableName } = this.listenerConfiguration
 		const insertUrl = `https://bigquery.googleapis.com/bigquery/v2/projects/${projectName}/datasets/${datasetName}/tables/${tableName}/insertAll`
 
@@ -27,8 +27,9 @@ export class BigQueryApi {
 			kind: "bigquery#tableDataInsertAllResponse",
 			rows,
 		}
+
 		// console.log(JSON.stringify(payload, null, 2))
-		const bqResp = await http.fetch({
+		const response = await http.fetch({
 			url: insertUrl,
 			method: "POST",
 			body: JSON.stringify(payload),
@@ -37,7 +38,7 @@ export class BigQueryApi {
 				authorization: "Bearer " + (await this.getToken()),
 			},
 		})
-		return bqResp
+		return (response.status == 200 && (await response.body)) || undefined
 	}
 	/**
 	 * https://cloud.google.com/bigquery/docs/reference/rest/v2/tables/insert
@@ -163,6 +164,7 @@ export namespace BigQueryApi {
 			"RECORD",
 			// (same as RECORD)
 			"STRUCT",
+			"GEOGRAPHY",
 		] as const
 		export const modeValues = ["NULLABLE", "REQUIRED", "REPEATED"] as const
 		export const type: isly.Type<TableSchemaField> = isly.object({

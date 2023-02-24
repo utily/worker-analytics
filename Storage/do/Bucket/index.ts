@@ -2,6 +2,7 @@ import * as gracely from "gracely"
 import * as storage from "cloudly-storage"
 import { Client } from "cloudly-storage/dist/DurableObject/Client"
 import * as model from "model"
+import { HasUuid } from "model/HasUuid"
 import { Listener } from "service/Listener"
 import { BucketStorage as BStorage } from "./Storage"
 
@@ -22,7 +23,7 @@ export class Bucket {
 		return result
 	}
 
-	async append(listenerConfiguration: Listener.Configuration, events: object[]): Promise<model.Batch | gracely.Error> {
+	async append(listenerConfiguration: Listener.Configuration, events: HasUuid[]): Promise<model.Batch | gracely.Error> {
 		return (await this.getStorageClient(listenerConfiguration)).post<model.Batch>("/events", events)
 	}
 

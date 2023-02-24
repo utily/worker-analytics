@@ -1,5 +1,6 @@
 import * as gracely from "gracely"
 import * as isly from "isly"
+import { HasUuid } from "model/HasUuid"
 import { EventWithMetadata } from "../../model"
 import { Filter } from "../Filter"
 
@@ -18,11 +19,31 @@ export abstract class BaseListener<C extends BaseListener.Configuration> {
 	 */
 	abstract setup(oldConfiguration?: C): Promise<BaseListener.SetupResult | gracely.Error>
 
-	abstract processBatch(batch: (EventWithMetadata | object)[]): Promise<boolean[]>
+	/**
+	 * Returns status of the listener.
+	 * Override `getStatus` instead to add details.
+	 */
+	async getStatus() {
+		const result: BaseListener.StatusResult = await this.addStatusDetails({ ok: true })
+		// TODO: Get statistics from bucket.
+		return result
+	}
+	/**
+	 * Returns status of the listener.
+	 *
+	 *This is a stub, made to be overridden.
+	 * Override this to add details.
+	 */
+	async addStatusDetails(result: BaseListener.StatusResult): Promise<BaseListener.StatusResult> {
+		return result
+	}
+
+	abstract processBatch(batch: HasUuid[]): Promise<boolean[]>
 }
 
 export namespace BaseListener {
 	export type SetupResult = { success: boolean; details?: (string | gracely.Error)[] }
+	export type StatusResult = { ok: boolean; details?: Record<string, any> }
 
 	export interface Configuration {
 		name: string

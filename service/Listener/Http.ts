@@ -1,4 +1,5 @@
 import * as isly from "isly"
+import { HasUuid } from "model/HasUuid"
 import { EventWithMetadata } from "../../model"
 import { BaseListener } from "./Base"
 
@@ -22,7 +23,7 @@ export namespace Http {
 		setup(oldConfiguration?: Http | undefined): Promise<BaseListener.SetupResult> {
 			return Promise.resolve({ success: true })
 		}
-		processBatch(batch: (EventWithMetadata | object)[]): Promise<boolean[]> {
+		processBatch(batch: HasUuid[]): Promise<boolean[]> {
 			throw new Error("Method not implemented.")
 		}
 	}

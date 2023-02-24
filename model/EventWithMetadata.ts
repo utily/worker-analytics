@@ -1,8 +1,9 @@
 import * as http from "cloudly-http"
 import * as isly from "isly"
 import { Event } from "./Event"
+import { HasUuid } from "./HasUuid"
 
-export interface EventWithMetadata extends Event {
+export interface EventWithMetadata extends Event, HasUuid {
 	created: string
 	cloudflare?: Request["cf"]
 	header: http.Request["header"]
@@ -13,6 +14,7 @@ export const EventWithMetadata = Event.extend<EventWithMetadata>(
 		created: isly.string(),
 		cloudflare: isly.any(),
 		header: isly.record(isly.string(), isly.string()),
+		uuid: isly.string(),
 	},
 	"EventWithMetaData"
 )

@@ -20,13 +20,10 @@ export async function create(
 		result = gracely.client.notFound("No configuration found in bucket.")
 	else
 		try {
-			// Add timestamp. Here's where this.lastTimestamp comes in -- if we receive a bunch of
-			// messages at the same time (or if the clock somehow goes backwards????), we'll assign
-			// them sequential timestamps, so at least the ordering is maintained.
-			const timestamp = Math.max(Date.now(), context.durableObject.lastTimestamp + 1)
-			context.durableObject.lastTimestamp = timestamp
-
-			await context.state.storage.put<object[]>(`/events/${new Date(timestamp).toISOString()}`, events)
+			await context.state.storage.put<object[]>(
+				`/events/${new Date(context.durableObject.getUniqueTimestamp()).toISOString()}`,
+				events
+			)
 			// If there is no alarm currently set, set one for 10 seconds from now
 			// Any further POSTs in the next 10 seconds will be part of this kh.
 			if ((await context.state.storage.getAlarm()) == null) {

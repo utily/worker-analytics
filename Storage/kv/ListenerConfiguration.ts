@@ -1,5 +1,4 @@
 import * as storage from "cloudly-storage"
-import { boolean } from "isly"
 import { Listener } from "service/Listener"
 
 export class ListenerConfiguration {

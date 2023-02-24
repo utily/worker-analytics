@@ -7,41 +7,41 @@ export const config: Listener.Configuration = {
 	filter: [
 		{
 			type: "selectively",
-			expression: "source:worker-analytics-test",
+			expression: "source:worker-analytics",
 		},
 		{ type: "useragent" },
 		{
 			type: "mapping",
-			mapping: [
-				["created", "created"],
-				["source", "source"],
-				["entity", "entity"],
-				["action", "action"],
-
-				["browser.name", "browserName"],
-				["browser.version", "browserVersion"],
-
-				["os.name", "osName"],
-				["os.version", "osVersion"],
-
-				["device.model", "deviceModel"],
-				["device.type", "deviceType"],
-				["device.vendor", "deviceVendor"],
-
-				["cloudflare.country", "country"],
-				["cloudflare.region", "region"],
-				["cloudflare.city", "city"],
-				["cloudflare.postalCode", "postalCode"],
-				["cloudflare.longitude", "longitude"],
-				["cloudflare.latitude", "latitude"],
-				["header.cfConnectionIp", "ip"],
-				["cloudflare.asOrganization", "isp"],
-				["cloudflare.colo", "cloudflareAirport"],
-				["cloudflare.isEUCountry", "eu"],
-				["cloudflare.httpProtocol", "httpProtocol"],
-				["cloudflare.tlsVersion", "tlsVersion"],
-				["cloudflare.timezone", "timezone"],
-			],
+			mapping: {
+				created: "created",
+				source: "source",
+				entity: "entity",
+				action: "action",
+				currency: "currency",
+				amount: "amount",
+				browserName: "browser.name",
+				browserVersion: "browser.version",
+				osName: "os.name",
+				osVersion: "os.version",
+				deviceModel: "device.model",
+				deviceType: "device.type",
+				deviceVendor: "device.vendor",
+				country: "cloudflare.country",
+				region: "cloudflare.region",
+				city: "cloudflare.city",
+				postalCode: "cloudflare.postalCode",
+				location: {
+					selector: ["cloudflare.longitude", "cloudflare.latitude"],
+					transform: "point",
+				},
+				ip: "header.cfConnectionIp",
+				isp: "cloudflare.asOrganization",
+				cloudflareAirport: "cloudflare.colo",
+				eu: { selector: "cloudflare.isEUCountry", transform: "boolean" },
+				httpProtocol: "cloudflare.httpProtocol",
+				tlsVersion: "cloudflare.tlsVersion",
+				timezone: "cloudflare.timezone",
+			},
 		},
 	],
 	privateKey: {
@@ -66,10 +66,12 @@ export const config: Listener.Configuration = {
 	datasetName: "paxport_paxshop_analytics_dev",
 	tableName: "worker_analytics_test",
 	tableSchema: [
-		{ name: "created", type: "STRING" },
+		{ name: "created", type: "TIMESTAMP" },
 		{ name: "source", type: "STRING" },
 		{ name: "entity", type: "STRING" },
 		{ name: "action", type: "STRING" },
+		{ name: "currency", type: "STRING" },
+		{ name: "amount", type: "NUMERIC" },
 		{
 			name: "browserName",
 			type: "STRING",
@@ -115,12 +117,10 @@ export const config: Listener.Configuration = {
 			type: "STRING",
 		},
 		{
-			name: "longitude",
-			type: "STRING",
-		},
-		{
-			name: "latitude",
-			type: "STRING",
+			name: "location",
+			type: "GEOGRAPHY",
+			mode: "NULLABLE",
+			description: "Use: POINT(longitude latitude)",
 		},
 		{
 			name: "ip",
@@ -136,7 +136,7 @@ export const config: Listener.Configuration = {
 		},
 		{
 			name: "eu",
-			type: "STRING",
+			type: "BOOLEAN",
 		},
 		{
 			name: "httpProtocol",

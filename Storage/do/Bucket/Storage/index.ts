@@ -17,7 +17,20 @@ export const storageProcessor = new Storage.Processor(storageRouter)
  * https://blog.cloudflare.com/durable-objects-alarms/
  */
 export class BucketStorage implements DurableObject {
-	public lastTimestamp: number
+	protected lastTimestamp: number
+	/**
+	 * Get a current timestamp, guaranteed to be unique in this durable object.
+	 *
+	 * Here's where this.lastTimestamp comes in -- if we receive a bunch of
+	 * messages at the same time (or if the clock somehow goes backwards????), we'll assign
+	 * them sequential timestamps, so at least the ordering is maintained.
+	 * @returns Milliseconds since 1970
+	 */
+	public getUniqueTimestamp() {
+		const timestamp = Math.max(Date.now(), this.lastTimestamp + 1)
+		this.lastTimestamp = timestamp
+		return timestamp
+	}
 
 	private listenerConfiguration: Listener.Configuration | undefined
 	public async getListenerConfiguration(): Promise<Listener.Configuration | undefined> {

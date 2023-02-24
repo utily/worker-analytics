@@ -3,7 +3,32 @@ import { EventWithMetadata } from "../../../model"
 import { BaseFilter } from "../Base"
 import { Selector } from "./Selector"
 
-type Pair<T> = [T, T]
+const transformNames = ["string", "boolean", "float", "integer", "number", "point"] as const
+
+type Transform = typeof transformNames[number]
+const transformers: Record<Transform, (value: any) => any> = {
+	string: value => `${value}`,
+	boolean: value => Boolean(value),
+	float: value => Number.parseFloat(value),
+	integer: value => Number.parseInt(value),
+	number: value => +value,
+	point: value => {
+		const xy = isly.array(isly.number()).value(Array.isArray(value) && value.map(item => +item))
+		return xy ? `POINT(${xy[0]} ${xy[1]})` : undefined
+	},
+}
+
+function transform(type: Getter["transform"], value: any | undefined): any {
+	return type && value != undefined ? transformers[type](value) : value
+}
+type RecordWithSelector<T extends string> = Record<string, T | Getter<T>>
+
+type MaybeArray<T> = T | T[]
+type Getter<T extends string = string> = {
+	selector: MaybeArray<T>
+	default?: MaybeArray<number | string | boolean>
+	transform?: Transform
+}
 
 export interface Mapping extends BaseFilter.Configuration {
 	type: "mapping"
@@ -12,16 +37,26 @@ export interface Mapping extends BaseFilter.Configuration {
 	 * Source is normally EventWithMetadata,
 	 * but not if mapping-filters are chained.
 	 *
-	 * The real type is [Selector, Selector], rest is for type-prediction in IDE
+	 * The Selector is just a string, but `& Record<never, never>` fools the IDE to not collapse it to a string, which gives type-prediction in IDE.
 	 */
-	mapping: Pair<EventWithMetadata.Selector | (Selector & Record<never, never>)>[]
+	mapping: RecordWithSelector<EventWithMetadata.Selector | (Selector & Record<never, never>)>
 }
 
 export namespace Mapping {
 	export const type = BaseFilter.Configuration.type.extend<Mapping>(
 		{
 			type: isly.string("mapping"),
-			mapping: isly.array(isly.tuple(Selector.type, Selector.type)),
+			mapping: isly.record(
+				Selector.type,
+				isly.union(
+					Selector.type,
+					isly.object<Getter<Selector>>({
+						selector: isly.union(Selector.type, isly.array(Selector.type)),
+						default: isly.optional(isly.any()),
+						transform: isly.optional(isly.string(transformNames)),
+					})
+				)
+			),
 		},
 		"Filter.Mapping"
 	)
@@ -30,10 +65,26 @@ export namespace Mapping {
 
 	export class Implementation extends BaseFilter<Mapping> {
 		filter(event: EventWithMetadata | object): EventWithMetadata | object | undefined {
-			return this.filterConfiguration.mapping.reduce(
-				(object, [getSelector, setSelector]) => Selector.set(object, setSelector, Selector.get(event, getSelector)),
-				{}
-			)
+			return Object.entries(this.filterConfiguration.mapping).reduce((object, [setSelector, getterValue]) => {
+				const getter: Getter = typeof getterValue == "string" ? { selector: getterValue } : getterValue
+
+				return Selector.set(
+					object,
+					setSelector,
+					transform(
+						getter.transform,
+						!getter.selector
+							? getter.default
+							: Array.isArray(getter.selector)
+							? getter.selector.map(
+									(getSelector, index) =>
+										Selector.get(event, getSelector) ??
+										(Array.isArray(getter.default) ? getter.default[index] : getter.default)
+							  )
+							: Selector.get(event, getter.selector) ?? getter.default
+					)
+				)
+			}, {})
 		}
 	}
 }
