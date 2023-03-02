@@ -18,7 +18,7 @@ export namespace BaseFilter {
 		export const type = isly.object<Configuration>(
 			{
 				type: isly.string(),
-				comment: isly.optional(isly.string()),
+				comment: isly.string().optional(),
 			},
 			"FilterConfiguration"
 		)

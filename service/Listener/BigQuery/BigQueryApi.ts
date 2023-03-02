@@ -170,23 +170,23 @@ export namespace BigQueryApi {
 		export const type: isly.Type<TableSchemaField> = isly.object({
 			name: isly.string(/^[a-zA-Z_][a-zA-Z0-9_]{0,299}$/),
 			type: isly.string(typeValues),
-			mode: isly.optional(isly.string(modeValues)),
-			categories: isly.optional(
-				isly.object({
-					names: isly.optional(isly.array(isly.string(), { criteria: "maxLength", value: 5 })),
+			mode: isly.string(modeValues).optional(),
+			categories: isly
+				.object({
+					names: isly.array(isly.string(), { criteria: "maxLength", value: 5 }).optional(),
 				})
-			),
-			collationSpec: isly.optional(isly.string()),
-			description: isly.optional(isly.string(/* TODO: MaxLength 1024 */)),
-			fields: isly.optional(isly.array(isly.lazy(() => type, "FieldDefinition"))),
-			maxLength: isly.optional(isly.string()),
-			policyTags: isly.optional(
-				isly.object({
-					names: isly.optional(isly.array(isly.string(), { criteria: "maxLength", value: 1 })),
+				.optional(),
+			collationSpec: isly.string().optional(),
+			description: isly.string(/* TODO: MaxLength 1024 */).optional(),
+			fields: isly.array(isly.lazy(() => type, "FieldDefinition")).optional(),
+			maxLength: isly.string().optional(),
+			policyTags: isly
+				.object({
+					names: isly.array(isly.string(), { criteria: "maxLength", value: 1 }).optional(),
 				})
-			),
-			precision: isly.optional(isly.string()),
-			scale: isly.optional(isly.string()),
+				.optional(),
+			precision: isly.string().optional(),
+			scale: isly.string().optional(),
 		})
 	}
 	export type TableResponse = {

@@ -1,4 +1,4 @@
-import { http, Request as HttpRequest } from "cloudly-http"
+import * as http from "cloudly-http"
 import * as isly from "isly"
 import { Event } from "model"
 /**
@@ -6,28 +6,34 @@ import { Event } from "model"
  * Define type of default values in D,
  *
  * Result is a type with all properties of T and E, with all properties of D as optional.
+ * If E is a union it is preserved.
  */
-type ExtraAndDefault<T extends object, E extends object = object, D extends Partial<T & E> = never> = Omit<
-	T,
-	D extends never ? never : keyof D
-> &
-	Partial<
-		{
-			[K in keyof T & keyof D]: T[K] | D[K]
-		}
-	> &
-	Omit<E, D extends never ? never : keyof D> &
-	Partial<
-		{
-			[K in keyof E & keyof D]: E[K] | D[K]
-		}
-	>
+type ExtraAndDefault<T extends object, E extends object = object, D extends Partial<T & E> = never> =
+	// E: Extends type, with default values as optional
+	// `E extends any ? ... : never` is a trick to keep E as a possible union: https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
+	(E extends any
+		? Omit<E, D extends never ? never : keyof D> &
+				Partial<
+					// This create a type with all properties which E and D has in common:
+					{
+						[K in keyof E & keyof D]: E[K] | D[K]
+					}
+				>
+		: never) &
+		// T: The core type, with default values as optional
+		Omit<T, D extends never ? never : keyof D> &
+		Partial<
+			// This create a type with all properties which E and T has in common:
+			{
+				[K in keyof T & keyof D]: T[K] | D[K]
+			}
+		>
 
 type MaybeArray<T> = T | T[]
 
 /**
  *
- * When using in worker, always provide executionContext and request.
+ * When used in worker, always provide executionContext and request.
  *
  * Generics:
  *
@@ -38,8 +44,7 @@ export class Analytics<E extends Record<string, any> = object, D extends Partial
 	constructor(
 		protected readonly configuration: Analytics.Configuration,
 		protected readonly executionContext?: ExecutionContext,
-		protected readonly request?: HttpRequest,
-		protected readonly cloudflareProperties?: Request["cf"],
+		protected readonly request?: http.Request,
 		protected readonly defaultValues: D = {} as never
 	) {}
 	/**
@@ -57,7 +62,7 @@ export class Analytics<E extends Record<string, any> = object, D extends Partial
 	public register(events: MaybeArray<ExtraAndDefault<Event, E, D>>): void | Promise<void> {
 		const batch = {
 			events: (Array.isArray(events) ? events : [events]).map(event => ({ ...this.defaultValues, ...event })),
-			cloudflare: this.cloudflareProperties,
+			cloudflare: this.request?.cloudflare,
 			header: this.request?.header ?? {},
 		}
 		const promise: Promise<void> = http
@@ -94,6 +99,6 @@ export namespace Analytics {
 	}
 	export const Configuration = isly.object<Configuration>({
 		endpoint: isly.string(),
-		defaultValues: isly.optional(isly.record(isly.string(), isly.any())),
+		defaultValues: isly.record(isly.string(), isly.any()).optional(),
 	})
 }

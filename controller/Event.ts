@@ -1,4 +1,3 @@
-import * as http from "cloudly-http"
 import type { Context } from "Context"
 import * as model from "model"
 
@@ -11,7 +10,7 @@ export class EventController {
 	public async addEvents(events: model.Event[]) {
 		return this.addBatch({
 			events,
-			cloudflare: this.context.cloudflareProperties,
+			cloudflare: this.context.request?.cloudflare,
 			header: this.context.request?.header ?? {},
 		})
 	}

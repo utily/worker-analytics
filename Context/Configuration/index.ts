@@ -29,7 +29,7 @@ export namespace Configuration {
 		{
 			analytics: Analytics.Configuration.type,
 			analyticsDefaultValues: isly.object({ source: isly.string(), currency: isly.string() }),
-			analyticsExtraFields: isly.optional(isly.any()),
+			analyticsExtraFields: isly.any().optional(),
 		},
 		"Configuration"
 	)

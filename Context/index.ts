@@ -58,7 +58,6 @@ export class Context {
 			this.configuration.analytics,
 			this.executionContext,
 			this.request,
-			this.cloudflareProperties,
 			this.configuration.analyticsDefaultValues
 		))
 	}
@@ -71,8 +70,7 @@ export class Context {
 		public readonly configuration: Configuration,
 		public readonly environment: Context.Environment,
 		public readonly executionContext?: ExecutionContext,
-		public readonly request?: http.Request,
-		public readonly cloudflareProperties?: Request["cf"]
+		public readonly request?: http.Request
 	) {}
 
 	async authenticate(request: http.Request): Promise<"admin" | undefined> {
@@ -88,7 +86,7 @@ export class Context {
 	): Promise<Response> {
 		let result: http.Response
 		const httpRequest = http.Request.from(request)
-		const context = await Context.load(environment, executionContext, httpRequest, request.cf)
+		const context = await Context.load(environment, executionContext, httpRequest)
 		if (!context)
 			result = http.Response.create(gracely.server.misconfigured("Configuration", "Configuration is missing."))
 		else {
@@ -109,13 +107,10 @@ export class Context {
 	static async load(
 		environment: Context.Environment,
 		executionContext?: ExecutionContext,
-		request?: http.Request,
-		cloudflareProperties?: Request["cf"]
+		request?: http.Request
 	): Promise<Context | undefined> {
 		const configuration = await Configuration.load(environment)
-		return !configuration
-			? undefined
-			: new Context(configuration, environment, executionContext, request, cloudflareProperties)
+		return !configuration ? undefined : new Context(configuration, environment, executionContext, request)
 	}
 }
 

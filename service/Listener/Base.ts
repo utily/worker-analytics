@@ -46,22 +46,22 @@ export namespace BaseListener {
 	export type StatusResult = { ok: boolean; details?: Record<string, any> }
 
 	export interface Configuration {
-		name: string
+		readonly name: string
 		/**
 		 * Number of events to send in every call to processBatch().
 		 */
-		batchSize: number
+		readonly batchSize: number
 		/**
 		 * Number of seconds between every batch.
 		 * Note: If queue is bigger than batchSize, the calls will be directly after each other.
 		 */
-		batchInterval: number
+		readonly batchInterval: number
 		/**
 		 * A selectively-expression
 		 */
-		filter: Filter.Configuration[]
+		readonly filter: Filter.Configuration[]
 
-		comment?: string
+		readonly comment?: string
 	}
 
 	export namespace Configuration {
@@ -72,7 +72,7 @@ export namespace BaseListener {
 				batchSize: isly.number("positive"),
 				batchInterval: isly.number("positive"),
 				filter: isly.array(Filter.Configuration),
-				comment: isly.optional(isly.string()),
+				comment: isly.string().optional(),
 			},
 			"ListenerConfiguration"
 		)

@@ -26,7 +26,7 @@ export namespace Useragent {
 	export const type = BaseFilter.Configuration.type.extend<Useragent>(
 		{
 			type: isly.string("useragent"),
-			fields: isly.optional(isly.array(isly.string(fieldValues))),
+			fields: isly.array(isly.string(fieldValues)).optional(),
 		},
 		"Filter.Useragent"
 	)

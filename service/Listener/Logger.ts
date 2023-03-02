@@ -3,7 +3,7 @@ import { HasUuid } from "model/HasUuid"
 import { EventWithMetadata } from "../../model"
 import { BaseListener } from "./Base"
 export interface Logger extends BaseListener.Configuration {
-	type: "logger"
+	readonly type: "logger"
 	/**
 	 * Url
 	 */

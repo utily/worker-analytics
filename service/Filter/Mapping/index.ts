@@ -52,8 +52,8 @@ export namespace Mapping {
 					Selector.type,
 					isly.object<Getter<Selector>>({
 						selector: isly.union(Selector.type, isly.array(Selector.type)),
-						default: isly.optional(isly.any()),
-						transform: isly.optional(isly.string(transformNames)),
+						default: isly.any().optional(),
+						transform: isly.string(transformNames).optional(),
 					})
 				)
 			),
