@@ -1,6 +1,6 @@
 import * as http from "cloudly-http"
 import * as isly from "isly"
-import { Event } from "model"
+import { Batch, Event } from "model"
 /**
  * Define extra fields in E,
  * Define type of default values in D,
@@ -97,8 +97,12 @@ export namespace Analytics {
 		endpoint: string
 		defaultValues?: Record<string, any>
 	}
-	export const Configuration = isly.object<Configuration>({
-		endpoint: isly.string(),
-		defaultValues: isly.record(isly.string(), isly.any()).optional(),
-	})
+	export namespace Configuration {
+		export const type = isly.object<Configuration>({
+			endpoint: isly.string(),
+			defaultValues: isly.record(isly.string(), isly.any()).optional(),
+		})
+		export const is = type.is
+		export const flaw = type.flaw
+	}
 }

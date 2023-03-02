@@ -1,12 +1,10 @@
 import * as gracely from "gracely"
 import { Analytics } from "Analytics"
 import * as http from "cloudly-http"
-import { EventController } from "controller/Event"
-import { ListenerController } from "controller/Listener"
 import { router } from "../router"
-import { Bucket as CBucket } from "../Storage/do/Bucket"
-import { Events as CEvents } from "../Storage/do/Events"
-import { ListenerConfiguration as CListenerConfiguration } from "../Storage/kv/ListenerConfiguration"
+import { Bucket as CBucket } from "../Storage/Bucket"
+import { Events as CEvents } from "../Storage/Events"
+import { ListenerConfiguration as CListenerConfiguration } from "../Storage/ListenerConfiguration"
 import { Configuration } from "./Configuration"
 import { Environment as CEnvironment } from "./Environment"
 // import { storageRouter } from "./Events/Storage/storageRouter"
@@ -32,24 +30,6 @@ export class Context {
 			(this.environment.listenerConfigurationStorage &&
 				Context.ListenerConfiguration.open(this.environment.listenerConfigurationStorage)) ??
 			gracely.server.misconfigured("listenerConfiguration", "KeyValueNamespace missing."))
-	}
-
-	#listenerController?: ListenerController | gracely.Error
-	get listenerController(): ListenerController | gracely.Error {
-		const listenerConfiguration = this.listenerConfiguration
-		const bucket = this.bucket
-		return (this.#listenerController ??= gracely.Error.is(listenerConfiguration)
-			? listenerConfiguration
-			: gracely.Error.is(bucket)
-			? bucket
-			: new ListenerController(listenerConfiguration, bucket))
-	}
-
-	#eventController?: EventController | gracely.Error
-	get eventController(): EventController | gracely.Error {
-		return (this.#eventController ??= gracely.Error.is(this.events)
-			? this.events
-			: new EventController(this.events, this))
 	}
 
 	#analytics?: Analytics<{ currency: string; amount?: number }, Configuration["analyticsDefaultValues"]>

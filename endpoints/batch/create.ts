@@ -11,10 +11,10 @@ export async function create(request: http.Request, context: Context): Promise<h
 	// 	result = gracely.client.unauthorized()
 	if (!model.Batch.type.is(batch))
 		result = gracely.client.flawedContent(model.Batch.type.flaw(batch))
-	else if (gracely.Error.is(context.eventController))
-		result = context.eventController
+	else if (gracely.Error.is(context.events))
+		result = context.events
 	else {
-		const response = await context.eventController.addBatch(batch)
+		const response = await context.events.addBatch(batch)
 		result = gracely.Error.is(response) ? gracely.server.databaseFailure(response) : gracely.success.created(response)
 	}
 	return result

@@ -9,10 +9,10 @@ export async function remove(request: http.Request, context: Context): Promise<h
 	const name = request.parameter.name
 	if (!isly.string().is(name))
 		result = gracely.client.invalidPathArgument("listener/:name", "name", "string", "A valid identifier is required.")
-	else if (gracely.Error.is(context.listenerController)) {
-		result = context.listenerController
+	else if (gracely.Error.is(context.listenerConfiguration)) {
+		result = context.listenerConfiguration
 	} else {
-		if (!(await context.listenerController.remove(name)))
+		if (!(await context.listenerConfiguration.remove(name)))
 			result = gracely.client.notFound(`No listener found with the name ${name}.`)
 		else
 			result = gracely.success.ok(true)

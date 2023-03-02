@@ -14,15 +14,12 @@ export async function create(request: http.Request, context: Context): Promise<h
 		result = gracely.client.flawedContent(
 			Array.isArray(events) ? isly.array(model.Event.type).flaw(events) : model.Event.type.flaw(events)
 		)
-	} else if (gracely.Error.is(context.eventController)) {
-		result = context.eventController
+	} else if (gracely.Error.is(context.events)) {
+		result = context.events
 	} else {
-		const response = await (Array.isArray(events)
-			? context.eventController.addEvents(events)
-			: context.eventController.addEvent(events))
+		const response = await context.events.addEvents(events, request)
 		result = gracely.Error.is(response) ? gracely.server.databaseFailure(response) : gracely.success.created(response)
 	}
 	return result
 }
 router.add("POST", "/events", create)
-1

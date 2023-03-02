@@ -29,7 +29,7 @@ function* generateBucket(waitingBatches: Map<string, model.Batch>, listeners: Co
 					},
 					eventWithMetaData
 				)
-				console.log(`Filtered value:`, filteredValue)
+				//console.log(`Filtered value:`, filteredValue)
 
 				if (filteredValue) {
 					filteredValue.uuid = uuid
@@ -83,7 +83,7 @@ storageRouter.alarm = async function alarm(storageContext) {
 	}
 	for (const [listenerName, events] of generateBucket(waitingBatches, listeners)) {
 		console.log(`Filling bucket "${listenerName}" with ${events.length} events.`)
-		const appendResult = await bucketStorage.append(listeners[listenerName], events)
+		const appendResult = await bucketStorage.addEvents(listeners[listenerName], events)
 		if (gracely.Error.is(appendResult)) {
 			console.error(appendResult)
 		}

@@ -26,8 +26,10 @@ export namespace Listener {
 
 	export type Configuration = Logger | Http | BigQuery
 	export type SetupResult = BaseListener.SetupResult
-	export const Configuration = isly.union(Logger.type, Http.type, BigQuery.type)
 	export namespace Configuration {
+		export const type = isly.union(Logger.type, Http.type, BigQuery.type)
+		export const is = type.is
+		export const flaw = type.flaw
 		export type Metadata = { created: isoly.DateTime; updated?: isoly.DateTime }
 	}
 }

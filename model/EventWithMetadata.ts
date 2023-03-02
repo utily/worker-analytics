@@ -9,7 +9,7 @@ export interface EventWithMetadata extends Event, HasUuid {
 	header: http.Request["header"]
 }
 
-export const EventWithMetadata = Event.extend<EventWithMetadata>(
+export const EventWithMetadata = Event.type.extend<EventWithMetadata>(
 	{
 		created: isly.string(),
 		cloudflare: isly.any(),

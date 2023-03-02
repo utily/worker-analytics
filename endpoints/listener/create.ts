@@ -13,10 +13,10 @@ export async function create(request: http.Request, context: Context): Promise<h
 
 	if (!Listener.Configuration.is(listenerConfiguration))
 		result = gracely.client.flawedContent(Listener.Configuration.flaw(listenerConfiguration))
-	else if (gracely.Error.is(context.listenerController))
-		result = context.listenerController
+	else if (gracely.Error.is(context.listenerConfiguration))
+		result = context.listenerConfiguration
 	else {
-		const createResult = await context.listenerController.create(listenerConfiguration)
+		const createResult = await context.listenerConfiguration.create(listenerConfiguration)
 		if (gracely.Error.is(createResult)) {
 			result = createResult
 		} else

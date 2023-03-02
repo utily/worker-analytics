@@ -14,6 +14,13 @@ export class Bucket {
 	private storageClient: Record<string, Client<gracely.Error> | undefined> = {}
 	private constructor(private readonly backend: storage.DurableObject.Namespace<gracely.Error>) {}
 
+	async addEvents(
+		listenerConfiguration: Listener.Configuration,
+		events: HasUuid[]
+	): Promise<model.Batch | gracely.Error> {
+		return (await this.getStorageClient(listenerConfiguration)).post<model.Batch>("/events", events)
+	}
+
 	private async getStorageClient(listenerConfiguration: Listener.Configuration): Promise<Client<gracely.Error>> {
 		let result = this.storageClient[listenerConfiguration.name]
 		if (!result) {
@@ -22,14 +29,6 @@ export class Bucket {
 		}
 		return result
 	}
-
-	async append(listenerConfiguration: Listener.Configuration, events: HasUuid[]): Promise<model.Batch | gracely.Error> {
-		return (await this.getStorageClient(listenerConfiguration)).post<model.Batch>("/events", events)
-	}
-
-	// async list(listenerName: string): Promise<model.Action[] | gracely.Error> {
-	// 	return this.getStorageClient(listenerName).get<model.Action[]>("/bucket")
-	// }
 
 	static open(backend?: DurableObjectNamespace | storage.DurableObject.Namespace): Bucket | undefined {
 		if (!storage.DurableObject.Namespace.is(backend))

@@ -14,4 +14,3 @@ export async function fetch(request: http.Request, context: Context): Promise<ht
 	return result
 }
 router.add("GET", "/events", fetch)
-1

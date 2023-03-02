@@ -13,7 +13,7 @@ const transformers: Record<Transform, (value: any) => any> = {
 	integer: value => Number.parseInt(value),
 	number: value => +value,
 	point: value => {
-		const xy = isly.array(isly.number()).value(Array.isArray(value) && value.map(item => +item))
+		const xy = isly.array(isly.number()).get(Array.isArray(value) && value.map(item => +item))
 		return xy ? `POINT(${xy[0]} ${xy[1]})` : undefined
 	},
 }

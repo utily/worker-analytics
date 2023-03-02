@@ -5,10 +5,10 @@ import { router } from "../../router"
 
 export async function list(request: http.Request, context: Context): Promise<http.Response.Like | any> {
 	let result: gracely.Result
-	if (gracely.Error.is(context.listenerController)) {
-		result = context.listenerController
+	if (gracely.Error.is(context.listenerConfiguration)) {
+		result = context.listenerConfiguration
 	} else {
-		const value = await context.listenerController.listKeys()
+		const value = await context.listenerConfiguration.listKeys()
 		if (gracely.Error.is(value))
 			result = value
 		else

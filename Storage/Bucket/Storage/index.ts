@@ -17,7 +17,7 @@ export const storageProcessor = new Storage.Processor(storageRouter)
  * https://blog.cloudflare.com/durable-objects-alarms/
  */
 export class BucketStorage implements DurableObject {
-	protected lastTimestamp: number
+	private lastTimestamp: number
 	/**
 	 * Get a current timestamp, guaranteed to be unique in this durable object.
 	 *
@@ -36,23 +36,6 @@ export class BucketStorage implements DurableObject {
 	public async getListenerConfiguration(): Promise<Listener.Configuration | undefined> {
 		return (this.listenerConfiguration ??= await this.state.storage.get<Listener.Configuration>("/configuration"))
 	}
-	// private listenerState: Record<string, any> | undefined | false
-	// public async getListenerState(): Promise<Record<string, any> | undefined> {
-	// 	this.listenerState ??= (await this.state.storage.get<Record<string, any>>("/state")) ?? false
-	// 	return this.listenerState || undefined
-	// }
-	// /**
-	//  * Noop if value is undefined
-	//  * @param value
-	//  * @returns
-	//  */
-	// public async setListenerState(value: Record<string, any> | undefined) {
-	// 	if (value) {
-	// 		await this.state.storage.put<Record<string, any>>("/state", value)
-	// 		this.listenerState = value
-	// 	}
-	// 	return this.listenerState || undefined
-	// }
 
 	constructor(private readonly state: DurableObjectState, private readonly environment: Environment) {
 		// From: https://github.com/cloudflare/workers-chat-demo/blob/master/src/chat.mjs#L222
