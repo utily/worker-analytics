@@ -21,7 +21,7 @@ export namespace Http {
 	)
 	export class Implementation extends BaseListener<Http> {
 		setup(oldConfiguration?: Http | undefined): Promise<BaseListener.SetupResult> {
-			return Promise.resolve({ success: true })
+			return Promise.resolve({ success: true as const })
 		}
 		processBatch(batch: HasUuid[]): Promise<boolean[]> {
 			throw new Error("Method not implemented.")

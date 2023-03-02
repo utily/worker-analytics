@@ -1,4 +1,3 @@
-import * as gracely from "gracely"
 import * as storage from "cloudly-storage"
 import { Listener } from "service/Listener"
 import { BaseListener } from "service/Listener/Base"
@@ -8,7 +7,7 @@ type FetchResult = {
 	status: BaseListener.StatusResult
 } & Partial<Listener.Configuration.Metadata>
 
-type CreateResult = FetchResult & { setup: Listener.SetupResult }
+type CreateResult = Partial<FetchResult> & { setup: Listener.SetupResult }
 
 export class ListenerConfiguration {
 	private constructor(
@@ -16,28 +15,20 @@ export class ListenerConfiguration {
 	) {}
 
 	async create(listenerConfiguration: Listener.Configuration) {
-		let result: CreateResult | gracely.Error
-		const setupResult = await Listener.create(listenerConfiguration).setup()
-		breakHere: if (gracely.Error.is(setupResult)) {
-			result = setupResult
-		} else {
-			if (setupResult.success) {
-				await this.saveListenerConfiguration(listenerConfiguration)
-				//TODO update config in bucket!
-				const fetchResult = await this.fetch(listenerConfiguration.name)
-				if (fetchResult) {
-					;(setupResult.details ??= []).push("Listenerconfiguration stored in KeyValue-store.")
-					result = {
-						setup: setupResult,
-						...fetchResult,
-					}
-					break breakHere
-				} else {
-					setupResult.success = false
-					;(setupResult.details ??= []).push("Failed to store listenerconfiguration in KeyValue-store.")
-				}
+		const result: CreateResult = {
+			setup: await Listener.create(listenerConfiguration).setup(),
+		}
+		if (result.setup.success) {
+			await this.saveListenerConfiguration(listenerConfiguration)
+			//TODO update config in bucket!
+			const fetchResult = await this.fetch(listenerConfiguration.name)
+			if (!fetchResult) {
+				result.setup.success = false
+				;(result.setup.details ??= []).push("Failed to store listenerconfiguration in KeyValue-store.")
+			} else {
+				;(result.setup.details ??= []).push("Listenerconfiguration stored in KeyValue-store.")
+				Object.assign(result, fetchResult)
 			}
-			result = gracely.server.backendFailure(setupResult.details ?? "Setup failed.")
 		}
 		return result
 	}

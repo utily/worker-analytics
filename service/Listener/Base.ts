@@ -17,7 +17,7 @@ export abstract class BaseListener<C extends BaseListener.Configuration> {
 	/**
 	 * This is called when the listener i configured, or reconfigured.
 	 */
-	abstract setup(oldConfiguration?: C): Promise<BaseListener.SetupResult | gracely.Error>
+	abstract setup(oldConfiguration?: C): Promise<BaseListener.SetupResult>
 
 	/**
 	 * Returns status of the listener.

@@ -17,8 +17,8 @@ export async function create(request: http.Request, context: Context): Promise<h
 		result = context.listenerConfiguration
 	else {
 		const createResult = await context.listenerConfiguration.create(listenerConfiguration)
-		if (gracely.Error.is(createResult)) {
-			result = createResult
+		if (!createResult.setup.success) {
+			result = gracely.server.backendFailure(createResult)
 		} else
 			result = gracely.success.created(createResult)
 	}
